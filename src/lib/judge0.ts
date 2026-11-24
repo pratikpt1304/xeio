@@ -19,7 +19,7 @@ const LANGUAGE_IDS: Record<string, number> = {
   go: 60, // Go (1.13 / 1.22)
 };
 
-const JUDGE0_API_URL = import.meta.env.VITE_JUDGE0_URL || 'https://judge0-ce.p.rapidapi.com';
+const JUDGE0_API_URL = import.meta.env.VITE_JUDGE0_URL || '';
 const JUDGE0_KEY = import.meta.env.VITE_JUDGE0_KEY || '';
 
 export async function executeCode(
@@ -29,8 +29,8 @@ export async function executeCode(
 ): Promise<ExecutionResult> {
   const languageId = LANGUAGE_IDS[lang] || 50;
 
-  // If Judge0 API is not configured with an external key, return simulated execution
-  if (!JUDGE0_KEY) {
+  // If Judge0 API URL is not configured, return fallback execution
+  if (!JUDGE0_API_URL) {
     await new Promise((r) => setTimeout(r, 600));
     return {
       stdout: stdin ? stdin.split('\n').reverse().join(' ') : 'Success',
@@ -43,13 +43,23 @@ export async function executeCode(
   }
 
   try {
-    const response = await fetch(`${JUDGE0_API_URL}/submissions?base64_encoded=false&wait=true`, {
+    const isRapidAPI = JUDGE0_API_URL.includes('rapidapi.com');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (isRapidAPI) {
+      headers['X-RapidAPI-Key'] = JUDGE0_KEY;
+      headers['X-RapidAPI-Host'] = 'judge0-ce.p.rapidapi.com';
+    } else if (JUDGE0_KEY) {
+      // Self-hosted Judge0 (Render / VPS) optional auth token
+      headers['X-Auth-Token'] = JUDGE0_KEY;
+      headers['Authorization'] = `Bearer ${JUDGE0_KEY}`;
+    }
+
+    const response = await fetch(`${JUDGE0_API_URL.replace(/\/+$/, '')}/submissions?base64_encoded=false&wait=true`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-RapidAPI-Key': JUDGE0_KEY,
-        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-      },
+      headers,
       body: JSON.stringify({
         source_code: sourceCode,
         language_id: languageId,
@@ -60,7 +70,7 @@ export async function executeCode(
     });
 
     if (!response.ok) {
-      throw new Error(`Judge0 responded with ${response.status}`);
+      throw new Error(`Judge0 responded with HTTP ${response.status}`);
     }
 
     return await response.json();
