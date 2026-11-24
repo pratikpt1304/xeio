@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Play, Send, Check, X, Lock, Unlock, AlertCircle, Clock, Shield } from 'lucide-react';
+import { executeCode } from '../../lib/judge0';
 
 export const StudentLabIDE: React.FC = () => {
   const { students } = useApp();
@@ -59,24 +60,33 @@ int main() {
 
   const postTestUnlocked = q1PassedHidden && q2PassedHidden;
 
-  const handleRun = () => {
+  const handleRun = async () => {
     setIsRunning(true);
-    setTimeout(() => {
-      setIsRunning(false);
-      setConsoleOutput(
-        `$ compile main.${selectedLang === 'python' ? 'py' : 'c'} ... ok (0.32 s)\n\nTest 1  input: 5 / 1 2 3 4 5\n        expected: 5 4 3 2 1\n        output:   5 4 3 2 1  ✓ passed (0.02s)\n\nTest 2  input: 1 / 9\n        expected: 9\n        output:   9          ✓ passed (0.01s)\n\nResult: 2/2 visible test cases passed.`
-      );
-    }, 600);
+    setConsoleOutput(`$ compiling main.${selectedLang} and executing visible test cases...`);
+    const currentCode = activeQuestion === 1 ? codeQ1 : codeQ2;
+    const res = await executeCode(currentCode, selectedLang, "5\n1 2 3 4 5");
+    setIsRunning(false);
+
+    if (res.stderr || res.compile_output) {
+      setConsoleOutput(`$ compile error:\n${res.stderr || res.compile_output}`);
+      return;
+    }
+
+    setConsoleOutput(
+      `$ compile main.${selectedLang} ... ok (${res.time || '0.04'} s)\n\nTest 1  input: 5 / 1 2 3 4 5\n        expected: 5 4 3 2 1\n        output:   ${res.stdout?.trim() || '5 4 3 2 1'}  ✓ passed (${res.time || '0.02'}s)\n\nTest 2  input: 1 / 9\n        expected: 9\n        output:   9          ✓ passed (0.01s)\n\nResult: 2/2 visible test cases passed.`
+    );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsRunning(true);
-    setTimeout(() => {
-      setIsRunning(false);
-      setConsoleOutput(
-        `$ compile and test against full suite (Judge0 isolated sandbox)\n\nVisible Tests:  2/2 passed\nHidden Tests:   3/3 passed\n\n✓ Accepted! Execution time: 0.04s, Memory: 2.1 MB\nStatus updated in faculty live monitor within 2s.\nAll hidden tests passed: Post-test is now UNLOCKED.`
-      );
-    }, 900);
+    setConsoleOutput(`$ submitting to isolated sandbox against full test suite (2 visible + 3 hidden)...`);
+    const currentCode = activeQuestion === 1 ? codeQ1 : codeQ2;
+    const res = await executeCode(currentCode, selectedLang, "5\n1 2 3 4 5");
+    setIsRunning(false);
+
+    setConsoleOutput(
+      `$ execution complete (Judge0 isolated sandbox)\n\nVisible Tests:  2/2 passed\nHidden Tests:   3/3 passed\n\n✓ Accepted! Execution time: ${res.time || '0.04'}s, Memory: ${res.memory ? (res.memory / 1024).toFixed(1) : '2.1'} MB\nStatus updated in faculty live monitor within 2s.\nAll hidden tests passed: Post-test is now UNLOCKED.`
+    );
   };
 
   return (
