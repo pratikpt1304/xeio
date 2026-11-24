@@ -25,7 +25,6 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
 
     try {
       if (!supabase) {
-        // Fallback if supabase client not available
         onSignIn();
         return;
       }
@@ -43,13 +42,11 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
         }
 
         if (data.user) {
-          // Check role metadata or default to faculty
           const userRole = (data.user.user_metadata?.role as Role) || 'faculty';
           switchRole(userRole);
           onSignIn();
         }
       } else {
-        // Sign Up
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password: password,
@@ -99,47 +96,47 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
     }
   };
 
-  // Handle Quick Demo Role Selection (for testing & evaluation)
+  // Handle Quick Demo Role Selection
   const handleQuickDemoSignIn = (role: Role) => {
     switchRole(role);
     onSignIn();
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#141413]">
+    <div className="min-h-screen md:h-screen flex flex-col md:flex-row bg-[#141413] overflow-y-auto md:overflow-hidden">
       {/* Left Brand Panel */}
-      <div className="w-full md:w-5/12 bg-[#141413] text-white p-8 md:p-14 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#262624]">
+      <div className="w-full md:w-5/12 bg-[#141413] text-white p-6 md:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#262624] shrink-0 overflow-y-auto">
         <div>
-          <XeIOLogo variant="dark" size="lg" className="mb-10" />
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-4 leading-tight">
+          <XeIOLogo variant="dark" size="lg" className="mb-6 md:mb-8" />
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white mb-3 leading-tight">
             The AI faculty assistant that plans, runs and reports every lab.
           </h1>
-          <p className="text-[#A3A299] text-base leading-relaxed max-w-md">
+          <p className="text-[#A3A299] text-sm leading-relaxed max-w-md">
             Unified institutional access for faculty, students, HODs, deans, CoE, and the VC. Role-scoped permissions with complete audit trails.
           </p>
         </div>
 
-        <div className="pt-12 mt-12 border-t border-[#262624]">
-          <div className="text-xs uppercase tracking-wider text-[#73726B] font-mono mb-3">
+        <div className="pt-6 mt-8 border-t border-[#262624]">
+          <div className="text-[11px] uppercase tracking-wider text-[#73726B] font-mono mb-2">
             Designed and maintained by
           </div>
           <div className="flex items-center gap-3">
             <ElzeoLogo variant="dark" size="md" />
           </div>
-          <div className="text-xs text-[#73726B] mt-3">
+          <div className="text-[11px] text-[#73726B] mt-2">
             Elzeo Future Technologies Pvt Ltd · Production Cloud Architecture
           </div>
         </div>
       </div>
 
       {/* Right Form Panel */}
-      <div className="w-full md:w-7/12 bg-paper p-6 md:p-14 flex items-center justify-center overflow-y-auto">
-        <div className="w-full max-w-md bg-surface p-8 rounded-[6px] border border-border shadow-none">
+      <div className="w-full md:w-7/12 bg-paper p-4 md:p-8 flex flex-col justify-start md:justify-center items-center overflow-y-auto h-full">
+        <div className="w-full max-w-md bg-surface p-6 md:p-7 rounded-[6px] border border-border shadow-none my-auto">
           {/* Tabs: Sign In / Create Account */}
-          <div className="flex border-b border-border mb-6">
+          <div className="flex border-b border-border mb-4">
             <button
               onClick={() => { setMode('signin'); setErrorMsg(null); setSuccessMsg(null); }}
-              className={`pb-2.5 text-sm font-medium mr-6 transition-colors border-b-2 ${
+              className={`pb-2 text-sm font-medium mr-5 transition-colors border-b-2 ${
                 mode === 'signin'
                   ? 'border-teal text-ink font-semibold'
                   : 'border-transparent text-muted hover:text-ink'
@@ -149,7 +146,7 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
             </button>
             <button
               onClick={() => { setMode('signup'); setErrorMsg(null); setSuccessMsg(null); }}
-              className={`pb-2.5 text-sm font-medium transition-colors border-b-2 ${
+              className={`pb-2 text-sm font-medium transition-colors border-b-2 ${
                 mode === 'signup'
                   ? 'border-teal text-ink font-semibold'
                   : 'border-transparent text-muted hover:text-ink'
@@ -159,58 +156,58 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
             </button>
           </div>
 
-          <h2 className="text-2xl font-semibold text-ink mb-1">
+          <h2 className="text-xl font-semibold text-ink mb-1">
             {mode === 'signin' ? 'Welcome back' : 'Create an institutional account'}
           </h2>
-          <p className="text-xs text-muted mb-6 leading-normal">
+          <p className="text-xs text-muted mb-4 leading-normal">
             {mode === 'signin'
               ? 'Enter your registered credentials or select a role to begin.'
               : 'Register your faculty or student profile connected to Supabase.'}
           </p>
 
           {errorMsg && (
-            <div className="mb-4 p-3 bg-danger-tint border border-danger/30 rounded-[6px] text-xs text-danger flex items-start gap-2">
-              <AlertCircle size={15} className="shrink-0 mt-0.5" />
+            <div className="mb-3 p-2.5 bg-danger-tint border border-danger/30 rounded-[6px] text-xs text-danger flex items-start gap-2">
+              <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 p-3 bg-teal-tint border border-teal/30 rounded-[6px] text-xs text-teal flex items-start gap-2">
-              <CheckCircle size={15} className="shrink-0 mt-0.5" />
+            <div className="mb-3 p-2.5 bg-teal-tint border border-teal/30 rounded-[6px] text-xs text-teal flex items-start gap-2">
+              <CheckCircle size={14} className="shrink-0 mt-0.5" />
               <span>{successMsg}</span>
             </div>
           )}
 
           {/* Email / Password Form */}
-          <form onSubmit={handleEmailAuth} className="space-y-3.5">
+          <form onSubmit={handleEmailAuth} className="space-y-3">
             {mode === 'signup' && (
               <>
                 <div>
-                  <label className="block text-xs font-mono text-muted uppercase mb-1">
+                  <label className="block text-[11px] font-mono text-muted uppercase mb-1">
                     Full Name
                   </label>
                   <div className="relative">
-                    <UserIcon size={14} className="absolute left-3 top-3 text-muted" />
+                    <UserIcon size={14} className="absolute left-3 top-2.5 text-muted" />
                     <input
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Dr. Ramesh Sharma"
-                      className="w-full pl-9 pr-3.5 py-2 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
+                      className="w-full pl-9 pr-3 py-1.5 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-muted uppercase mb-1">
+                  <label className="block text-[11px] font-mono text-muted uppercase mb-1">
                     Select Your Role
                   </label>
                   <select
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value as Role)}
-                    className="w-full px-3 py-2 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal"
+                    className="w-full px-3 py-1.5 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal"
                   >
                     <option value="faculty">Faculty / Lab In-Charge</option>
                     <option value="student">Student</option>
@@ -224,34 +221,34 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
             )}
 
             <div>
-              <label className="block text-xs font-mono text-muted uppercase mb-1">
+              <label className="block text-[11px] font-mono text-muted uppercase mb-1">
                 Institutional Email
               </label>
               <div className="relative">
-                <Mail size={14} className="absolute left-3 top-3 text-muted" />
+                <Mail size={14} className="absolute left-3 top-2.5 text-muted" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="faculty@university.edu"
-                  className="w-full pl-9 pr-3.5 py-2 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
+                  className="w-full pl-9 pr-3 py-1.5 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-muted uppercase mb-1">
+              <label className="block text-[11px] font-mono text-muted uppercase mb-1">
                 Password
               </label>
               <div className="relative">
-                <Lock size={14} className="absolute left-3 top-3 text-muted" />
+                <Lock size={14} className="absolute left-3 top-2.5 text-muted" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3.5 py-2 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
+                  className="w-full pl-9 pr-3 py-1.5 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
                   required
                   minLength={6}
                 />
@@ -261,25 +258,25 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 px-4 bg-teal text-white text-sm font-medium rounded-[6px] hover:bg-[#0b4b42] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-2 px-4 bg-teal text-white text-xs font-medium rounded-[6px] hover:bg-[#0b4b42] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoading ? (
                 <span>Connecting to Supabase...</span>
               ) : (
                 <>
                   <span>{mode === 'signin' ? 'Sign In to Workspace' : 'Create Account'}</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={13} />
                 </>
               )}
             </button>
           </form>
 
           {/* Google SSO Button */}
-          <div className="mt-4">
+          <div className="mt-3">
             <button
               type="button"
               onClick={handleGoogleSSO}
-              className="w-full py-2 px-3 border border-border bg-surface-alt hover:bg-surface text-xs font-medium text-ink rounded-[6px] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-1.5 px-3 border border-border bg-surface-alt hover:bg-surface text-xs font-medium text-ink rounded-[6px] transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -291,59 +288,59 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
             </button>
           </div>
 
-          {/* Quick Access Demo Roles (No Password Needed for Evaluation) */}
-          <div className="mt-6 pt-5 border-t border-border">
-            <div className="text-[11px] font-mono text-muted uppercase mb-2.5 flex items-center justify-between">
+          {/* Quick Access Demo Roles */}
+          <div className="mt-4 pt-3.5 border-t border-border">
+            <div className="text-[10px] font-mono text-muted uppercase mb-2 flex items-center justify-between">
               <span>Quick Evaluation Roles</span>
-              <span className="text-[10px] text-teal font-sans">1-Click Access</span>
+              <span className="text-[9px] text-teal font-sans">1-Click Access</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => handleQuickDemoSignIn('faculty')}
-                className="p-2 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
+                className="p-1.5 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
               >
-                <div className="font-semibold text-ink">Faculty Workspace</div>
-                <div className="text-[10px] text-muted">Course, Labs, Live Monitor</div>
+                <div className="font-semibold text-ink text-[11px]">Faculty Workspace</div>
+                <div className="text-[9px] text-muted leading-tight">Course, Labs, Live Monitor</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemoSignIn('student')}
-                className="p-2 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
+                className="p-1.5 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
               >
-                <div className="font-semibold text-ink">Student IDE</div>
-                <div className="text-[10px] text-muted">Coding, Tests, Lab File</div>
+                <div className="font-semibold text-ink text-[11px]">Student IDE</div>
+                <div className="text-[9px] text-muted leading-tight">Coding, Tests, Lab File</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemoSignIn('hod')}
-                className="p-2 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
+                className="p-1.5 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
               >
-                <div className="font-semibold text-ink">HOD Console</div>
-                <div className="text-[10px] text-muted">Approvals & Compliance</div>
+                <div className="font-semibold text-ink text-[11px]">HOD Console</div>
+                <div className="text-[9px] text-muted leading-tight">Approvals & Compliance</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemoSignIn('dean')}
-                className="p-2 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
+                className="p-1.5 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all"
               >
-                <div className="font-semibold text-ink">Dean / CoE / VC</div>
-                <div className="text-[10px] text-muted">Multi-School Oversight</div>
+                <div className="font-semibold text-ink text-[11px]">Dean / CoE / VC</div>
+                <div className="text-[9px] text-muted leading-tight">Multi-School Oversight</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemoSignIn('super_admin')}
-                className="col-span-2 p-2 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all flex items-center justify-between"
+                className="col-span-2 p-1.5 text-left rounded-[6px] border border-border bg-surface-alt hover:border-teal hover:bg-teal-tint transition-all flex items-center justify-between"
               >
                 <div>
-                  <div className="font-semibold text-ink">Super Administrator</div>
-                  <div className="text-[10px] text-muted">Manage Institutions, Subscriptions & Limits</div>
+                  <div className="font-semibold text-ink text-[11px]">Super Administrator</div>
+                  <div className="text-[9px] text-muted leading-tight">Manage Institutions, Subscriptions & Limits</div>
                 </div>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#E2E0D8] rounded text-ink">Admin</span>
+                <span className="text-[9px] font-mono px-1 py-0.5 bg-[#E2E0D8] rounded text-ink">Admin</span>
               </button>
             </div>
           </div>
