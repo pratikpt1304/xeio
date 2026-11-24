@@ -1,0 +1,34 @@
+# Cloudflare Pages response headers. Rules that match the same path are merged, so the CSP and
+# Permissions-Policy are set per document path (never on /*) to avoid two CSP headers combining.
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-Frame-Options: DENY
+
+/
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=(), interest-cohort=()
+
+/index.html
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=(), interest-cohort=()
+
+# The app needs camera, microphone and screen capture only for proctored exams, and WASM for face detection.
+# style-src 'unsafe-inline' is required for React style attributes and the code editor; scripts stay strict.
+/app/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self' blob:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Permissions-Policy: camera=(self), microphone=(self), display-capture=(self), fullscreen=(self), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cache-Control: no-cache
+  X-Robots-Tag: noindex, nofollow
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/models/*
+  Cache-Control: public, max-age=31536000, immutable

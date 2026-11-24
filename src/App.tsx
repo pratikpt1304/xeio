@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { LandingPage } from './components/Landing/LandingPage';
 import { SignInScreen } from './components/SignInScreen';
 import { FacultyWorkspace } from './components/FacultyWorkspace/FacultyWorkspace';
 import { StudentApp } from './components/StudentApp/StudentApp';
@@ -7,11 +8,17 @@ import { HODConsole } from './components/Oversight/HODConsole';
 import { OversightConsole } from './components/Oversight/OversightConsole';
 import { SuperAdminConsole } from './components/Admin/SuperAdminConsole';
 import { supabase } from './lib/supabase';
+import { Globe } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { currentUser, switchRole } = useApp();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('xeio_authenticated') === 'true';
+  });
+  const [viewMode, setViewMode] = useState<'landing' | 'signin' | 'app'>(() => {
+    if (localStorage.getItem('xeio_authenticated') === 'true') return 'app';
+    if (window.location.hash.includes('login') || window.location.pathname.includes('/app')) return 'signin';
+    return 'landing';
   });
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
@@ -22,6 +29,7 @@ const AppContent: React.FC = () => {
 
     if (savedAuth === 'true') {
       setIsAuthenticated(true);
+      setViewMode('app');
       if (savedRole) {
         switchRole(savedRole);
       }
@@ -32,6 +40,7 @@ const AppContent: React.FC = () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setIsAuthenticated(true);
+          setViewMode('app');
           const role = (session.user.user_metadata?.role as any) || savedRole || 'faculty';
           switchRole(role);
           localStorage.setItem('xeio_authenticated', 'true');
@@ -43,6 +52,7 @@ const AppContent: React.FC = () => {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
           setIsAuthenticated(true);
+          setViewMode('app');
           localStorage.setItem('xeio_authenticated', 'true');
         }
       });
@@ -62,6 +72,7 @@ const AppContent: React.FC = () => {
       switchRole(role);
     }
     setIsAuthenticated(true);
+    setViewMode('app');
   };
 
   const handleSignOut = async () => {
@@ -71,6 +82,7 @@ const AppContent: React.FC = () => {
       await supabase.auth.signOut();
     }
     setIsAuthenticated(false);
+    setViewMode('landing');
   };
 
   if (isInitializing) {
@@ -84,24 +96,28 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return <SignInScreen onSignIn={handleSignIn} />;
+  // 1. Landing Page View (Default for portal visitors)
+  if (viewMode === 'landing' && !isAuthenticated) {
+    return <LandingPage onSignInClick={() => setViewMode('signin')} />;
   }
 
+  // 2. Sign In Screen View
+  if (!isAuthenticated || viewMode === 'signin') {
+    return (
+      <SignInScreen
+        onSignIn={handleSignIn}
+        onBackToLanding={() => setViewMode('landing')}
+      />
+    );
+  }
+
+  // 3. Authenticated App Workspaces View
   const renderCurrentRoleView = () => {
     switch (currentUser.activeRole) {
       case 'faculty':
-        return (
-          <FacultyWorkspace
-            onSignOut={handleSignOut}
-          />
-        );
+        return <FacultyWorkspace onSignOut={handleSignOut} />;
       case 'student':
-        return (
-          <StudentApp
-            onSignOut={handleSignOut}
-          />
-        );
+        return <StudentApp onSignOut={handleSignOut} />;
       case 'hod':
         return <HODConsole onSignOut={handleSignOut} />;
       case 'dean':
@@ -111,16 +127,22 @@ const AppContent: React.FC = () => {
       case 'super_admin':
         return <SuperAdminConsole onSignOut={handleSignOut} />;
       default:
-        return (
-          <FacultyWorkspace
-            onSignOut={handleSignOut}
-          />
-        );
+        return <FacultyWorkspace onSignOut={handleSignOut} />;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans relative">
+      {/* Floating shortcut to return to landing page */}
+      <button
+        onClick={() => setViewMode('landing')}
+        title="View XeIO Public Landing Page"
+        className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 px-3 py-1.5 bg-[#141413] text-white hover:bg-[#262624] text-[11px] font-mono rounded-full border border-[#2E2E2C] shadow-lg transition-transform hover:scale-105"
+      >
+        <Globe size={13} className="text-teal" />
+        <span>Public Landing Page</span>
+      </button>
+
       <div className="flex-1">
         {renderCurrentRoleView()}
       </div>

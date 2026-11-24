@@ -1,0 +1,79 @@
+/* XeIO landing: editorial layout (FLYY4 patterns) in the XeIO palette. Blue marks the path and the one action. */
+:root { --ink: #141413; --paper: #f4f3ef; --muted: #5f5e58; --line: #d9d6cc; --blue: #1f5fe0; --blue-d: #3fa9f5; --serif: 'IBM Plex Serif', Georgia, serif; --sans: 'IBM Plex Sans', system-ui, sans-serif; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.skip { position: absolute; left: -999px; } .skip:focus { left: 16px; top: 16px; background: #fff; padding: 8px 12px; z-index: 9; }
+.mark { font: 600 26px var(--sans); letter-spacing: -0.01em; text-decoration: none; } .mark span { color: var(--blue); }
+.kicker { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+h1, h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.015em; margin: 0; }
+h1 { font-size: clamp(40px, 6vw, 76px); line-height: 1.04; }
+h1 em { font-style: italic; }
+h2 { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.1; margin-bottom: 20px; }
+p { max-width: 62ch; }
+.go { display: inline-block; background: var(--blue); color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: 600; font-size: 16px; }
+.go:hover { background: #164bb8; }
+.plain { text-decoration: underline; text-underline-offset: 4px; font-size: 16px; margin-left: 20px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; padding: 22px clamp(20px, 5vw, 72px); }
+.top nav { display: flex; gap: 26px; align-items: center; font-size: 15px; }
+.top nav a:not(.go) { text-decoration: none; }
+.top nav a:not(.go):hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 760px) { .top nav a:not(.go) { display: none; } }
+
+main > section { padding: clamp(56px, 9vw, 120px) clamp(20px, 5vw, 72px); }
+.hero { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; align-items: center; padding-top: 40px !important; }
+.hero-text { grid-column: 1 / span 6; }
+.hero .lead { font-size: 20px; color: #2e2d2a; margin: 26px 0 32px; }
+.hero-shot { grid-column: 7 / span 6; margin: 0 calc(-1 * clamp(20px, 5vw, 72px)) 0 0; }
+.hero-shot img, .shot img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px 0 0 8px; }
+@media (max-width: 960px) { .hero-text, .hero-shot { grid-column: 1 / -1; } .hero-shot { margin: 0; } .hero-shot img { border-radius: 8px; } }
+
+/* the flight path: one continuous line with waypoints */
+.journey h2 { max-width: 16ch; }
+.path { list-style: none; margin: 48px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; position: relative; counter-reset: wp; }
+.path::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; border-top: 1.5px solid var(--blue); }
+.path li { position: relative; padding-top: 36px; counter-increment: wp; }
+.path li::before { content: ''; position: absolute; top: 2px; left: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--blue); }
+.path li:last-child::before { background: var(--blue); }
+.path b { display: block; font: 400 26px var(--serif); margin-bottom: 8px; }
+.path b::before { content: '0' counter(wp) '  '; font: 13px var(--sans); color: var(--muted); letter-spacing: 0.1em; vertical-align: middle; }
+.path span { display: block; font-size: 16px; color: #2e2d2a; }
+@media (max-width: 960px) { .path { grid-template-columns: 1fr; } .path::before { left: 7px; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 1.5px solid var(--blue); } .path li { padding: 0 0 0 36px; } .path li::before { top: 8px; } }
+
+.split { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; align-items: center; }
+.split .copy { grid-column: 2 / span 5; }
+.split .shot { grid-column: 8 / span 5; margin: 0 calc(-1 * clamp(20px, 5vw, 72px)) 0 0; }
+.split.reverse .copy { grid-column: 7 / span 5; }
+.split.reverse .shot { grid-column: 1 / span 6; margin: 0 0 0 calc(-1 * clamp(20px, 5vw, 72px)); }
+.split.reverse .shot img { border-radius: 0 8px 8px 0; }
+@media (max-width: 960px) { .split .copy, .split .shot, .split.reverse .copy, .split.reverse .shot { grid-column: 1 / -1; margin: 0; } .shot img { border-radius: 8px !important; } }
+
+.dark { background: var(--ink); color: #e8e6df; }
+.dark .kicker { color: #a8a69e; }
+.dark .copy { max-width: 760px; margin-left: 8.33%; }
+.dark .shot.wide { margin: 48px 0 0; }
+.dark .shot img { border-color: #2c2b28; border-radius: 8px; }
+@media (max-width: 960px) { .dark .copy { margin-left: 0; } }
+
+.numbers { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr 1fr; gap: 32px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.numbers p { margin: 0; font-size: 16px; color: #2e2d2a; }
+.numbers b { display: block; font: 400 clamp(44px, 5vw, 72px)/1 var(--serif); color: var(--ink); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) { .numbers { grid-template-columns: 1fr 1fr; } }
+
+.facts { padding: 0; list-style: none; margin: 0; }
+.facts li { padding: 12px 0; border-top: 1px solid var(--line); font-size: 17px; }
+
+.faq { max-width: 860px; margin-left: 8.33%; }
+.faq details { border-top: 1px solid var(--line); padding: 16px 0; }
+.faq summary { cursor: pointer; font: 400 22px var(--serif); }
+.faq p { color: #2e2d2a; }
+@media (max-width: 960px) { .faq { margin-left: 0; } }
+
+.foot { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; padding: 48px clamp(20px, 5vw, 72px); border-top: 1px solid var(--line); background: #fff; }
+.foot img { width: 200px; height: auto; }
+.foot .small { grid-column: 1 / -1; font-size: 13px; color: var(--muted); margin: 0; }
+@media (max-width: 640px) { .foot { grid-template-columns: 1fr; } }

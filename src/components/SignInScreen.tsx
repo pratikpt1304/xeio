@@ -3,9 +3,9 @@ import { useApp } from '../context/AppContext';
 import { XeIOLogo, ElzeoLogo } from './Brand';
 import { Role } from '../types';
 import { supabase } from '../lib/supabase';
-import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, ArrowLeft } from 'lucide-react';
 
-export const SignInScreen: React.FC<{ onSignIn: (role?: Role) => void }> = ({ onSignIn }) => {
+export const SignInScreen: React.FC<{ onSignIn: (role?: Role) => void; onBackToLanding?: () => void }> = ({ onSignIn, onBackToLanding }) => {
   const { switchRole } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,6 +82,16 @@ export const SignInScreen: React.FC<{ onSignIn: (role?: Role) => void }> = ({ on
       {/* Right Form Panel */}
       <div className="w-full md:w-7/12 bg-paper p-4 md:p-8 flex flex-col justify-start md:justify-center items-center overflow-y-auto h-full">
         <div className="w-full max-w-md bg-surface p-6 md:p-8 rounded-[6px] border border-border shadow-none my-auto">
+          {onBackToLanding && (
+            <button
+              onClick={onBackToLanding}
+              className="mb-4 text-xs font-mono text-muted hover:text-ink flex items-center gap-1.5 transition-colors"
+            >
+              <ArrowLeft size={13} />
+              <span>Back to XeIO Home</span>
+            </button>
+          )}
+
           <div className="mb-5">
             <div className="text-[11px] font-mono text-teal uppercase tracking-wider mb-1 font-semibold">
               Institutional Portal
