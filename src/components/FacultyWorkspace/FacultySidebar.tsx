@@ -135,13 +135,6 @@ export const FacultySidebar: React.FC<FacultySidebarProps> = ({
       {/* Footer Branding & Actions */}
       <div className="p-4 border-t border-[#262624] space-y-3">
         <button
-          onClick={onPreviewAsStudent}
-          className="w-full text-left text-xs text-[#A3A299] hover:text-white hover:underline flex items-center justify-between"
-        >
-          <span>Preview as student</span>
-          <ChevronRight className="w-3 h-3" />
-        </button>
-        <button
           onClick={onSignOut}
           className="w-full text-left text-xs text-[#A3A299] hover:text-white hover:underline"
         >

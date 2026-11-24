@@ -64,12 +64,6 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
         </span>
         <span className="text-[#3A3935]">|</span>
         <button
-          onClick={onSwitchToFaculty}
-          className="text-teal-tint hover:text-white hover:underline text-[11px]"
-        >
-          Faculty view
-        </button>
-        <button
           onClick={onSignOut}
           className="text-[#A3A299] hover:text-white hover:underline text-[11px]"
         >
