@@ -34,6 +34,7 @@ interface AppContextType {
   addCO: (co: Omit<CourseOutcome, 'id'>) => void;
   removeCO: (id: string) => void;
   copoMap: COPOMap[];
+  updateCOPOMapping: (coCode: string, poKey: string, value: number) => void;
   rubric: MarkingRubric;
   updateRubric: (rubric: MarkingRubric) => void;
   planStatus: 'draft' | 'sent' | 'approved' | 'declined';
@@ -117,9 +118,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       {
         co_code: newCO.code,
-        po_scores: { PO1: 2, PO2: 2, PO3: 1, PO5: 0, PO12: 1, PSO1: 2 },
+        po_scores: { PO1: 0, PO2: 0, PO3: 0, PO5: 0, PO12: 0, PSO1: 0 },
       },
     ]);
+  };
+
+  const updateCOPOMapping = (coCode: string, poKey: string, value: number) => {
+    setCOPOMap((prev) =>
+      prev.map((row) =>
+        row.co_code === coCode
+          ? { ...row, po_scores: { ...row.po_scores, [poKey]: value } }
+          : row
+      )
+    );
   };
 
   const removeCO = (id: string) => {
@@ -404,6 +415,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCO,
         removeCO,
         copoMap,
+        updateCOPOMapping,
         rubric,
         updateRubric,
         planStatus,

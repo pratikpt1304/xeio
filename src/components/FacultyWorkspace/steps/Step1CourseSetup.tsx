@@ -11,6 +11,7 @@ export const Step1CourseSetup: React.FC = () => {
     addCO,
     removeCO,
     copoMap,
+    updateCOPOMapping,
     rubric,
     updateRubric,
     planStatus,
@@ -294,14 +295,19 @@ export const Step1CourseSetup: React.FC = () => {
           )}
         </div>
 
-        {/* Dynamic CO-PO Map */}
+        {/* Manual CO-PO Map */}
         <div className="bg-surface p-5 rounded-[6px] border border-border overflow-x-auto">
-          <div className="text-xs font-mono text-muted uppercase tracking-wider mb-3">
-            CO–PO map
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-xs font-mono text-muted uppercase tracking-wider">
+              CO–PO map
+            </div>
+            <span className="text-[10px] font-mono text-muted">
+              0=None · 1=Low · 2=Med · 3=High
+            </span>
           </div>
           {copoMap.length === 0 ? (
             <div className="p-8 text-center text-xs text-muted font-mono">
-              CO–PO matrix will automatically populate as outcomes are added.
+              Add Course Outcomes to manually map CO–PO correlation levels (0–3).
             </div>
           ) : (
             <table className="w-full text-xs font-mono text-center">
@@ -318,13 +324,30 @@ export const Step1CourseSetup: React.FC = () => {
                 {copoMap.map((row) => (
                   <tr key={row.co_code}>
                     <td className="py-1.5 text-left font-medium text-ink">{row.co_code}</td>
-                    {['PO1', 'PO2', 'PO3', 'PSO1'].map((po) => (
-                      <td key={po} className="py-1.5">
-                        <span className="px-1.5 py-0.5 bg-teal-tint text-teal rounded text-[11px]">
-                          {row.po_scores[po] ?? 2}
-                        </span>
-                      </td>
-                    ))}
+                    {['PO1', 'PO2', 'PO3', 'PSO1'].map((po) => {
+                      const val = row.po_scores[po] ?? 0;
+                      return (
+                        <td key={po} className="py-1.5">
+                          <select
+                            aria-label={`${row.co_code} ${po} mapping`}
+                            value={val}
+                            onChange={(e) =>
+                              updateCOPOMapping(row.co_code, po, parseInt(e.target.value, 10) || 0)
+                            }
+                            className={`px-1.5 py-0.5 rounded text-[11px] font-mono cursor-pointer border focus:outline-none focus:ring-1 focus:ring-teal ${
+                              val > 0
+                                ? 'bg-teal-tint text-teal border-teal/30 font-semibold'
+                                : 'bg-surface-alt text-muted border-border'
+                            }`}
+                          >
+                            <option value={0}>0</option>
+                            <option value={1}>1</option>
+                            <option value={2}>2</option>
+                            <option value={3}>3</option>
+                          </select>
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
