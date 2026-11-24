@@ -21,6 +21,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const JUDGE0_URL = (process.env.JUDGE0_URL || 'https://judge0-ce.p.rapidapi.com').replace(/\/+$/, '');
 const JUDGE0_KEY = process.env.JUDGE0_KEY || '';
 
+// Gemini LLM Configuration (Passed via Render Environment Variable)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+
 // Language ID Mapping (PRD Section 12)
 const LANGUAGE_IDS = {
   c: 50,      // C (GCC 9.2.0 / 13)
@@ -71,7 +74,7 @@ app.get('/health', (req, res) => {
     service: 'XeIO AI Assistant & Execution API',
     timestamp: new Date().toISOString(),
     judge0_configured: Boolean(JUDGE0_URL && (JUDGE0_KEY || JUDGE0_URL.includes('onrender.com'))),
-    gemini_configured: Boolean(process.env.GEMINI_API_KEY),
+    gemini_configured: Boolean(GEMINI_API_KEY),
     supabase_configured: Boolean(SUPABASE_URL),
   });
 });
@@ -210,7 +213,7 @@ app.post('/api/submit', async (req, res) => {
 app.post('/api/assist/generate-questions', async (req, res) => {
   try {
     const { topic, co = 'CO1', btl = 'L3 Apply' } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = GEMINI_API_KEY;
 
     if (!apiKey) {
       return res.status(400).json({
@@ -247,7 +250,7 @@ Return STRICT JSON matching this schema:
   ]
 }`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     const geminiRes = await fetch(geminiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -278,7 +281,7 @@ Return STRICT JSON matching this schema:
 app.post('/api/assist/generate-banks', async (req, res) => {
   try {
     const { topic } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = GEMINI_API_KEY;
 
     if (!apiKey) {
       return res.status(400).json({
@@ -290,7 +293,7 @@ app.post('/api/assist/generate-banks', async (req, res) => {
 Constraint: STRICTLY 0 OVERLAP between pre-test and post-test.
 Return JSON with "pre_test" (array of 5 MCQs) and "post_test" (array of 5 MCQs), each with stem, 4 options, and correct index (0-3).`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     const geminiRes = await fetch(geminiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
