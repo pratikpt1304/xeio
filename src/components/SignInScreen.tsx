@@ -5,7 +5,7 @@ import { Role } from '../types';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
-export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
+export const SignInScreen: React.FC<{ onSignIn: (role?: Role) => void }> = ({ onSignIn }) => {
   const { switchRole } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +20,7 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
 
     try {
       if (!supabase) {
-        onSignIn();
+        onSignIn('faculty');
         return;
       }
 
@@ -38,7 +38,7 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
       if (data.user) {
         const userRole = (data.user.user_metadata?.role as Role) || 'faculty';
         switchRole(userRole);
-        onSignIn();
+        onSignIn(userRole);
       }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'An error occurred during authentication.');
@@ -49,7 +49,7 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
   // Handle Quick Demo Role Selection
   const handleQuickDemoSignIn = (role: Role) => {
     switchRole(role);
-    onSignIn();
+    onSignIn(role);
   };
 
   return (

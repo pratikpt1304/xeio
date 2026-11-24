@@ -10,22 +10,32 @@ import { supabase } from './lib/supabase';
 
 const AppContent: React.FC = () => {
   const { currentUser, switchRole } = useApp();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('xeio_authenticated') === 'true';
+  });
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   useEffect(() => {
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch {}
+    // Restore persistent session from localStorage
+    const savedAuth = localStorage.getItem('xeio_authenticated');
+    const savedRole = localStorage.getItem('xeio_active_role') as any;
+
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+      if (savedRole) {
+        switchRole(savedRole);
+      }
+    }
 
     // Check existing Supabase session on startup
     if (supabase) {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setIsAuthenticated(true);
-          const role = (session.user.user_metadata?.role as any) || 'faculty';
+          const role = (session.user.user_metadata?.role as any) || savedRole || 'faculty';
           switchRole(role);
+          localStorage.setItem('xeio_authenticated', 'true');
+          localStorage.setItem('xeio_active_role', role);
         }
         setIsInitializing(false);
       });
@@ -33,8 +43,7 @@ const AppContent: React.FC = () => {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
           setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
+          localStorage.setItem('xeio_authenticated', 'true');
         }
       });
 
@@ -46,7 +55,18 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
+  const handleSignIn = (role?: any) => {
+    localStorage.setItem('xeio_authenticated', 'true');
+    if (role) {
+      localStorage.setItem('xeio_active_role', role);
+      switchRole(role);
+    }
+    setIsAuthenticated(true);
+  };
+
   const handleSignOut = async () => {
+    localStorage.removeItem('xeio_authenticated');
+    localStorage.removeItem('xeio_active_role');
     if (supabase) {
       await supabase.auth.signOut();
     }
@@ -65,7 +85,7 @@ const AppContent: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return <SignInScreen onSignIn={() => setIsAuthenticated(true)} />;
+    return <SignInScreen onSignIn={handleSignIn} />;
   }
 
   const renderCurrentRoleView = () => {

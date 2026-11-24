@@ -90,14 +90,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState<StudentProgress | null>(null);
 
-  // Clear any residual cached data on start
-  useEffect(() => {
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch {}
-  }, []);
-
   const switchRole = (role: Role) => {
     const matchedUser = defaultUsers.find((u) => u.roles.includes(role)) || {
       ...defaultUsers[0],
