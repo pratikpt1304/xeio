@@ -21,7 +21,7 @@ export const FacultyWorkspace: React.FC<FacultyWorkspaceProps> = ({
   onPreviewAsStudent,
   onSignOut,
 }) => {
-  const [currentStep, setCurrentStep] = useState<number>(6); // Default to Step 6 (Sessions / Live Lab)
+  const [currentStep, setCurrentStep] = useState<number>(1); // Default to Step 1 (Course Setup)
 
   const renderStep = () => {
     switch (currentStep) {
