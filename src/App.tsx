@@ -16,17 +16,28 @@ const AppContent: React.FC = () => {
     return localStorage.getItem('xeio_authenticated') === 'true';
   });
 
-  // View mode: 'landing' (always default on home root) | 'signin' | 'app'
+  // View mode: 'landing' (default on fresh visit) | 'signin' | 'app' (workspace)
   const [viewMode, setViewMode] = useState<'landing' | 'signin' | 'app'>(() => {
+    const isAuth = localStorage.getItem('xeio_authenticated') === 'true';
+    const activeView = sessionStorage.getItem('xeio_view_mode');
+
+    // If user was actively inside workspace and refreshed (F5), STAY in workspace!
+    if (isAuth && activeView === 'app') {
+      return 'app';
+    }
     if (window.location.hash.includes('app') || window.location.pathname.startsWith('/app')) {
-      return localStorage.getItem('xeio_authenticated') === 'true' ? 'app' : 'signin';
+      return isAuth ? 'app' : 'signin';
     }
     if (window.location.hash.includes('login') || window.location.pathname.startsWith('/login')) {
       return 'signin';
     }
-    // Always default to the official Landing Page!
     return 'landing';
   });
+
+  const updateViewMode = (mode: 'landing' | 'signin' | 'app') => {
+    sessionStorage.setItem('xeio_view_mode', mode);
+    setViewMode(mode);
+  };
 
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
@@ -61,7 +72,7 @@ const AppContent: React.FC = () => {
           localStorage.setItem('xeio_authenticated', 'true');
         } else if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
-          setViewMode('landing');
+          updateViewMode('landing');
         }
       });
 
@@ -80,14 +91,14 @@ const AppContent: React.FC = () => {
       switchRole(role);
     }
     setIsAuthenticated(true);
-    setViewMode('app');
+    updateViewMode('app');
   };
 
   const handleSignOut = () => {
     localStorage.clear();
     sessionStorage.clear();
     setIsAuthenticated(false);
-    setViewMode('landing');
+    updateViewMode('landing');
     if (window.location.hash) {
       window.location.hash = '';
     }
@@ -118,9 +129,9 @@ const AppContent: React.FC = () => {
         userRole={currentUser.activeRole ? currentUser.activeRole.toUpperCase() : 'Faculty'}
         onSignInClick={() => {
           if (isAuthenticated) {
-            setViewMode('app');
+            updateViewMode('app');
           } else {
-            setViewMode('signin');
+            updateViewMode('signin');
           }
         }}
       />
@@ -132,7 +143,7 @@ const AppContent: React.FC = () => {
     return (
       <SignInScreen
         onSignIn={handleSignIn}
-        onBackToLanding={() => setViewMode('landing')}
+        onBackToLanding={() => updateViewMode('landing')}
       />
     );
   }
@@ -161,7 +172,7 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen flex flex-col font-sans relative">
       {/* Floating shortcut to return to landing page */}
       <button
-        onClick={() => setViewMode('landing')}
+        onClick={() => updateViewMode('landing')}
         title="View XeIO Public Landing Page"
         className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 px-3 py-1.5 bg-[#141413] text-white hover:bg-[#262624] text-[11px] font-mono rounded-full border border-[#2E2E2C] shadow-lg transition-transform hover:scale-105"
       >
