@@ -84,8 +84,8 @@ const AppContent: React.FC = () => {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem('xeio_authenticated');
-    localStorage.removeItem('xeio_active_role');
+    localStorage.clear();
+    sessionStorage.clear();
     setIsAuthenticated(false);
     setViewMode('landing');
     if (window.location.hash) {
