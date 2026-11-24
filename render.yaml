@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: xeio-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: standard
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        value: https://hhqufgoaypijuehbvzwx.supabase.co
+      - key: JUDGE0_URL
+        value: https://judge0-ce.p.rapidapi.com
+      - key: JUDGE0_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
