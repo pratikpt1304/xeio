@@ -16,7 +16,7 @@ export const StudentApp: React.FC<StudentAppProps> = ({
   onSwitchToFaculty,
   onSignOut,
 }) => {
-  const [currentTab, setCurrentTab] = useState<'home' | 'classroom' | 'lab' | 'labfile' | 'endsem'>('lab');
+  const [currentTab, setCurrentTab] = useState<'home' | 'classroom' | 'lab' | 'labfile' | 'endsem'>('home');
 
   return (
     <div className="min-h-screen flex flex-col bg-paper text-ink">

@@ -60,7 +60,7 @@ export const StudentHeader: React.FC<StudentHeaderProps> = ({
       {/* Right: Student Profile & Switcher */}
       <div className="flex items-center gap-3 text-xs font-mono">
         <span className="text-[#A3A299]">
-          Demo Student · <strong className="text-white">2301044</strong>
+          {currentUser.name} {currentUser.roll_number ? <>· <strong className="text-white">{currentUser.roll_number}</strong></> : null}
         </span>
         <span className="text-[#3A3935]">|</span>
         <button
