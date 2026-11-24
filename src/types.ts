@@ -136,6 +136,10 @@ export interface StudentProgress {
   student_id: string;
   roll: string;
   name: string;
+  email: string;
+  onboarding_code: string;
+  invite_status: 'pending' | 'sent' | 'joined';
+  invite_sent_at?: string;
   seat_number: number;
   attendance_status: 'present' | 'late' | 'absent';
   pre_test_score: number; // out of 5

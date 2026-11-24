@@ -22,8 +22,34 @@ export const Step1CourseSetup: React.FC = () => {
   const [newCOStatement, setNewCOStatement] = useState('');
   const [newCOBtl, setNewCOBtl] = useState<CourseOutcome['btl']>('L3 Apply');
   const [showAddCO, setShowAddCO] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const totalRubricMarks = Object.values(rubric).reduce((a, b) => a + b, 0);
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email?.trim() || '');
+  };
+
+  const handleSendToHOD = () => {
+    setValidationError(null);
+    if (!course.code?.trim()) {
+      setValidationError('Please enter a valid Course Code (e.g. CSL-101).');
+      return;
+    }
+    if (!course.title?.trim()) {
+      setValidationError('Please enter a Course Title (e.g. Data Structures & Algorithms Lab).');
+      return;
+    }
+    if (!isValidEmail(course.hodEmail || '')) {
+      setValidationError('Please provide an actual, valid HOD email address (e.g. hod.cse@university.edu).');
+      return;
+    }
+    if (cos.length === 0) {
+      setValidationError('Please add at least one Course Outcome (CO) before submitting to HOD.');
+      return;
+    }
+    sendPlanToHOD();
+  };
 
   const handleAddCOSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,9 +93,8 @@ export const Step1CourseSetup: React.FC = () => {
               </div>
             ) : (
               <button
-                onClick={sendPlanToHOD}
-                disabled={!course.code || cos.length === 0}
-                className="flex items-center gap-1.5 px-4 py-2 bg-teal text-white rounded-[6px] text-xs font-medium hover:bg-[#0b4b42] disabled:opacity-50 transition-colors"
+                onClick={handleSendToHOD}
+                className="flex items-center gap-1.5 px-4 py-2 bg-teal text-white rounded-[6px] text-xs font-medium hover:bg-[#0b4b42] transition-colors shadow-sm"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Send course plan to HOD</span>
@@ -78,6 +103,16 @@ export const Step1CourseSetup: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Validation Error Banner */}
+      {validationError && (
+        <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-[6px] text-xs flex items-center justify-between">
+          <span>{validationError}</span>
+          <button onClick={() => setValidationError(null)} className="text-red-600 hover:text-red-800 text-xs font-bold">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Editable Course Details Card */}
       <div className="bg-surface p-5 rounded-[6px] border border-border space-y-4">

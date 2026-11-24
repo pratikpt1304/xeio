@@ -54,6 +54,10 @@ interface AppContextType {
   updateStudentViva: (studentId: string, marks: number) => void;
   classroomItems: ClassroomItem[];
   addClassroomItem: (item: Omit<ClassroomItem, 'id' | 'created_at'>) => void;
+  updateClassroomItem: (id: string, updates: Partial<ClassroomItem>) => void;
+  removeClassroomItem: (id: string) => void;
+  sendStudentOnboardingEmail: (studentId: string) => void;
+  resendAllOnboardingEmails: () => void;
   endSem: EndSemAssessment;
   setEndSemStage: (stage: 1 | 2 | 3 | 4 | 5 | 6) => void;
   approveEndSemQuestion: (qId: string) => void;
@@ -194,14 +198,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const importRoster = (studentNames: string[]) => {
-    const generatedStudents: StudentProgress[] = studentNames.map((name, idx) => {
+  const importRoster = (rawLines: string[]) => {
+    const generatedStudents: StudentProgress[] = rawLines.map((line, idx) => {
       const seat = idx + 1;
-      const roll = `23010${seat.toString().padStart(2, '0')}`;
+      const parts = line.split(/[,;\t|]/).map((p) => p.trim());
+
+      let roll = `23010${seat.toString().padStart(2, '0')}`;
+      let name = `Student ${seat}`;
+      let email = `student${seat}@university.edu`;
+
+      if (parts.length >= 3) {
+        roll = parts[0] || roll;
+        name = parts[1] || name;
+        email = parts[2] || email;
+      } else if (parts.length === 2) {
+        if (parts[1].includes('@')) {
+          name = parts[0];
+          email = parts[1];
+        } else {
+          roll = parts[0];
+          name = parts[1];
+        }
+      } else if (parts.length === 1 && parts[0]) {
+        if (parts[0].includes('@')) {
+          email = parts[0];
+          name = parts[0].split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        } else {
+          name = parts[0];
+        }
+      }
+
+      // Generate a unique 6-character onboarding accession code
+      const onboardingCode = `XEI-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
       return {
-        student_id: `std-${roll}`,
+        student_id: `std-${roll.replace(/[^a-zA-Z0-9]/g, '') || idx + 1}`,
         roll,
         name,
+        email,
+        onboarding_code: onboardingCode,
+        invite_status: 'sent',
+        invite_sent_at: new Date().toISOString(),
         seat_number: seat,
         attendance_status: 'present',
         pre_test_score: 0,
@@ -210,13 +247,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         q1_status: 'not_started',
         q2_status: 'not_started',
         runs_count: 0,
-        last_activity: 'Just enrolled',
+        last_activity: 'Enrolled & invite sent',
         flags: [],
         viva_score: 0,
         submissions: [],
       };
     });
+
     setStudents(generatedStudents);
+    setAiMessage(`Onboarding invitations dispatched with accession codes to ${generatedStudents.length} student emails.`);
+  };
+
+  const sendStudentOnboardingEmail = (studentId: string) => {
+    setStudents((prev) =>
+      prev.map((s) => {
+        if (s.student_id === studentId) {
+          return {
+            ...s,
+            invite_status: 'sent',
+            invite_sent_at: new Date().toISOString(),
+          };
+        }
+        return s;
+      })
+    );
+    const target = students.find((s) => s.student_id === studentId);
+    if (target) {
+      setAiMessage(`Onboarding invite email re-sent to ${target.email} with accession code [${target.onboarding_code}].`);
+    }
+  };
+
+  const resendAllOnboardingEmails = () => {
+    const timestamp = new Date().toISOString();
+    setStudents((prev) =>
+      prev.map((s) => ({
+        ...s,
+        invite_status: 'sent',
+        invite_sent_at: timestamp,
+      }))
+    );
+    setAiMessage(`Re-dispatched onboarding invite emails with class accession codes to all ${students.length} students.`);
   };
 
   const updateStudentAttendance = (studentId: string, status: 'present' | 'late' | 'absent') => {
@@ -238,6 +308,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       created_at: new Date().toISOString(),
     };
     setClassroomItems((prev) => [newItem, ...prev]);
+    setAiMessage(`Classroom task "${item.title}" created successfully.`);
+  };
+
+  const updateClassroomItem = (id: string, updates: Partial<ClassroomItem>) => {
+    setClassroomItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+    );
+    setAiMessage(`Classroom task "${updates.title || 'item'}" successfully updated.`);
+  };
+
+  const removeClassroomItem = (id: string) => {
+    setClassroomItems((prev) => prev.filter((item) => item.id !== id));
+    setAiMessage('Classroom item deleted.');
   };
 
   const setEndSemStage = (stage: 1 | 2 | 3 | 4 | 5 | 6) => {
@@ -339,8 +422,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         importRoster,
         updateStudentAttendance,
         updateStudentViva,
+        sendStudentOnboardingEmail,
+        resendAllOnboardingEmails,
         classroomItems,
         addClassroomItem,
+        updateClassroomItem,
+        removeClassroomItem,
         endSem,
         setEndSemStage,
         approveEndSemQuestion,
