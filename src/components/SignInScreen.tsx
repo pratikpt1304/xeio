@@ -113,7 +113,7 @@ export const SignInScreen: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="faculty@university.edu"
+                  placeholder="student@university.edu"
                   className="w-full pl-9 pr-3 py-2 bg-surface text-ink text-sm rounded-[6px] border border-border focus:outline-none focus:ring-1 focus:ring-teal focus:border-teal"
                   required
                 />
