@@ -1,9 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicPath = path.join(__dirname, 'public');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,6 +18,11 @@ const PORT = process.env.PORT || 5000;
 // CORS configuration - Allow all in development and production frontend domain
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
+
+// Serve static frontend assets if built
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+}
 
 // Supabase Client Setup
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://hhqufgoaypijuehbvzwx.supabase.co';
@@ -38,6 +50,10 @@ const LANGUAGE_IDS = {
 // 1. Root & Health Check Endpoints (Required by Render)
 // --------------------------------------------------------------------------
 app.get('/', (req, res) => {
+  const indexPath = path.join(publicPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
   res.send(`<!DOCTYPE html>
 <html>
   <head>
@@ -66,6 +82,16 @@ app.get('/', (req, res) => {
     </div>
   </body>
 </html>`);
+});
+
+// Single-page app fallback for any route
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path === '/health') return next();
+  const indexPath = path.join(publicPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  next();
 });
 
 app.get('/health', (req, res) => {

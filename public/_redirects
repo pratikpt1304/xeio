@@ -1,3 +1,1 @@
-# Single-page app under /app: every deep link serves the app shell; React Router takes over.
-/app      /app/        301
-/app/*    /app/index.html   200
+/*    /index.html   200
