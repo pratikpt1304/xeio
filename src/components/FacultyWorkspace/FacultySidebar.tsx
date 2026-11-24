@@ -6,7 +6,6 @@ import { CheckCircle2, ChevronRight } from 'lucide-react';
 interface FacultySidebarProps {
   currentStep: number;
   onSelectStep: (step: number) => void;
-  onPreviewAsStudent: () => void;
   onSignOut: () => void;
 }
 
@@ -26,7 +25,6 @@ interface StepGroup {
 export const FacultySidebar: React.FC<FacultySidebarProps> = ({
   currentStep,
   onSelectStep,
-  onPreviewAsStudent,
   onSignOut,
 }) => {
   const { planStatus, course, batches, sessions } = useApp();

@@ -13,12 +13,10 @@ import { Step8Assessments } from './steps/Step8Assessments';
 import { Step9Reports } from './steps/Step9Reports';
 
 interface FacultyWorkspaceProps {
-  onPreviewAsStudent: () => void;
   onSignOut: () => void;
 }
 
 export const FacultyWorkspace: React.FC<FacultyWorkspaceProps> = ({
-  onPreviewAsStudent,
   onSignOut,
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(1); // Default to Step 1 (Course Setup)
@@ -54,7 +52,6 @@ export const FacultyWorkspace: React.FC<FacultyWorkspaceProps> = ({
       <FacultySidebar
         currentStep={currentStep}
         onSelectStep={(step) => setCurrentStep(step)}
-        onPreviewAsStudent={onPreviewAsStudent}
         onSignOut={onSignOut}
       />
 

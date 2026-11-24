@@ -93,14 +93,12 @@ const AppContent: React.FC = () => {
       case 'faculty':
         return (
           <FacultyWorkspace
-            onPreviewAsStudent={() => switchRole('student')}
             onSignOut={handleSignOut}
           />
         );
       case 'student':
         return (
           <StudentApp
-            onSwitchToFaculty={() => switchRole('faculty')}
             onSignOut={handleSignOut}
           />
         );
@@ -115,7 +113,6 @@ const AppContent: React.FC = () => {
       default:
         return (
           <FacultyWorkspace
-            onPreviewAsStudent={() => switchRole('student')}
             onSignOut={handleSignOut}
           />
         );

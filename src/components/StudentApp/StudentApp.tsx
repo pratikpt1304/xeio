@@ -8,12 +8,10 @@ import { StudentEndSem } from './StudentEndSem';
 import { FooterBranding } from '../Brand';
 
 interface StudentAppProps {
-  onSwitchToFaculty: () => void;
   onSignOut: () => void;
 }
 
 export const StudentApp: React.FC<StudentAppProps> = ({
-  onSwitchToFaculty,
   onSignOut,
 }) => {
   const [currentTab, setCurrentTab] = useState<'home' | 'classroom' | 'lab' | 'labfile' | 'endsem'>('home');
@@ -24,7 +22,6 @@ export const StudentApp: React.FC<StudentAppProps> = ({
       <StudentHeader
         currentTab={currentTab}
         onSelectTab={(tab) => setCurrentTab(tab)}
-        onSwitchToFaculty={onSwitchToFaculty}
         onSignOut={onSignOut}
       />
 

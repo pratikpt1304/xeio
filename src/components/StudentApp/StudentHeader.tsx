@@ -5,14 +5,12 @@ import { XeIOLogo, ElzeoLogo } from '../Brand';
 interface StudentHeaderProps {
   currentTab: 'home' | 'classroom' | 'lab' | 'labfile' | 'endsem';
   onSelectTab: (tab: 'home' | 'classroom' | 'lab' | 'labfile' | 'endsem') => void;
-  onSwitchToFaculty: () => void;
   onSignOut: () => void;
 }
 
 export const StudentHeader: React.FC<StudentHeaderProps> = ({
   currentTab,
   onSelectTab,
-  onSwitchToFaculty,
   onSignOut,
 }) => {
   const { currentUser } = useApp();
