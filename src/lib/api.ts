@@ -1,6 +1,6 @@
-// XeIO Backend API Client (Connecting to Render / Node.js API Service)
+// XeIO API Client (Running directly on Cloudflare Edge)
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://xeio.onrender.com').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
 export interface RunResult {
   stdout: string | null;
