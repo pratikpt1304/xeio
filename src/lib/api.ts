@@ -1,6 +1,6 @@
 // XeIO Backend API Client (Connecting to Render / Node.js API Service)
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://xeio.onrender.com').replace(/\/+$/, '');
 
 export interface RunResult {
   stdout: string | null;

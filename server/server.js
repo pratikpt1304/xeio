@@ -32,8 +32,39 @@ const LANGUAGE_IDS = {
 };
 
 // --------------------------------------------------------------------------
-// 1. Health Check Endpoint (Required by Render)
+// 1. Root & Health Check Endpoints (Required by Render)
 // --------------------------------------------------------------------------
+app.get('/', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>XeIO Backend API — Live</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; background: #141413; color: #F4F3EF; padding: 40px; line-height: 1.6; }
+      .card { background: #1B1B1A; border: 1px solid #262624; border-radius: 8px; padding: 28px; max-width: 580px; margin: 40px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+      .badge { display: inline-block; background: #0E5E52; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+      a { color: #3FA9F5; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      code { background: #262624; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #E2E0D8; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2 style="margin-top:0;">XeIO API & Execution Service</h2>
+      <p><span class="badge">● LIVE & OPERATIONAL</span></p>
+      <p style="color: #A3A299;">The backend execution service on Render is connected and ready to process code sandboxes, hidden test cases, and AI Assist requests.</p>
+      <hr style="border: 0; border-top: 1px solid #262624; margin: 20px 0;" />
+      <p style="font-weight: bold; margin-bottom: 8px;">Active Endpoints:</p>
+      <ul style="color: #A3A299; padding-left: 20px;">
+        <li><a href="/health">GET /health</a> — Health check & configuration status</li>
+        <li><code>POST /api/run</code> — Judge0 code sandbox runner</li>
+        <li><code>POST /api/submit</code> — Server-gated test evaluator</li>
+      </ul>
+    </div>
+  </body>
+</html>`);
+});
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
