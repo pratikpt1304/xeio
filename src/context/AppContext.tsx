@@ -22,6 +22,7 @@ import {
   cleanEndSemAssessment,
   defaultCourseFileSections,
 } from '../data/mockData';
+import { generateThirtySessions } from '../data/sessionGenerator';
 
 interface AppContextType {
   currentUser: User;
@@ -43,6 +44,8 @@ interface AppContextType {
   generateSessions: () => void;
   activeSessionId: string;
   setActiveSessionId: (id: string) => void;
+  toggleQuestionSelection: (sessionId: string, questionId: string) => void;
+  approveSession: (sessionId: string) => void;
   batches: Batch[];
   addBatch: (batch: Omit<Batch, 'id'>) => void;
   students: StudentProgress[];
@@ -142,27 +145,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const generateSessions = () => {
-    const newSessions: Session[] = Array.from({ length: 15 }, (_, i) => {
-      const n = i + 1;
-      return {
-        id: `s-${n}`,
-        n,
-        title: `Session ${n}`,
-        date: `2027-0${Math.floor(i / 4) + 1}-${((i % 4) * 7 + 6).toString().padStart(2, '0')}`,
-        topic: `Lab Module ${n}`,
-        co_id: cos.length > 0 ? cos[i % cos.length].code : 'CO1',
-        btl: 'L3 Apply',
-        status: 'draft',
-        pre_open: '18:00 previous day',
-        pre_close: '09:59 same day',
-        post_close: '23:59 same day',
-        questions: [],
-        pre_bank: [],
-        post_bank: [],
-      };
-    });
+    const newSessions = generateThirtySessions();
     setSessions(newSessions);
     if (newSessions.length > 0) setActiveSessionId(newSessions[0].id);
+  };
+
+  const toggleQuestionSelection = (sessionId: string, questionId: string) => {
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id !== sessionId) return s;
+        const currentSelected = s.questions.filter((q) => q.is_selected);
+        const targetQ = s.questions.find((q) => q.id === questionId);
+        if (!targetQ) return s;
+
+        if (targetQ.is_selected) {
+          return {
+            ...s,
+            questions: s.questions.map((q) =>
+              q.id === questionId ? { ...q, is_selected: false } : q
+            ),
+          };
+        }
+
+        if (currentSelected.length < 2) {
+          return {
+            ...s,
+            questions: s.questions.map((q) =>
+              q.id === questionId ? { ...q, is_selected: true } : q
+            ),
+          };
+        }
+
+        return s;
+      })
+    );
+  };
+
+  const approveSession = (sessionId: string) => {
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id !== sessionId) return s;
+        return {
+          ...s,
+          status: 'active',
+          questions: s.questions.map((q) => (q.is_selected ? { ...q, status: 'approved' } : q)),
+        };
+      })
+    );
   };
 
   const importRoster = (studentNames: string[]) => {
@@ -302,6 +331,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         generateSessions,
         activeSessionId,
         setActiveSessionId,
+        toggleQuestionSelection,
+        approveSession,
         batches,
         addBatch,
         students,

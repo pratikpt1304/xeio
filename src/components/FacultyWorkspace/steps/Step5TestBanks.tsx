@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
-import { Sparkles, CheckCircle2, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Sparkles, CheckCircle2, RefreshCw, ShieldCheck, Check } from 'lucide-react';
 
 export const Step5TestBanks: React.FC = () => {
-  const { useAICredit } = useApp();
-  const [selectedSession, setSelectedSession] = useState<number>(13);
+  const { sessions, approveSession, useAICredit } = useApp();
+  const [selectedSessionNum, setSelectedSessionNum] = useState<number>(13);
+  const [activeTab, setActiveTab] = useState<'pre' | 'post'>('pre');
 
-  const sessionNumbers = Array.from({ length: 30 }, (_, i) => i + 1);
+  const currentSession = sessions.find((s) => s.n === selectedSessionNum) || sessions[0];
+  const activeSessionsCount = sessions.filter((s) => s.status === 'active').length;
+
+  const currentBankItems = currentSession
+    ? activeTab === 'pre'
+      ? currentSession.pre_bank
+      : currentSession.post_bank
+    : [];
 
   return (
     <div className="space-y-6">
@@ -15,7 +23,7 @@ export const Step5TestBanks: React.FC = () => {
         <div className="text-[11px] font-mono text-muted uppercase tracking-wider mb-1">
           STEP 5 · PREPARE
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold text-ink">Pre-test and post-test banks</h1>
             <p className="text-xs text-muted mt-1">
@@ -24,13 +32,17 @@ export const Step5TestBanks: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono text-teal">14/30 active banks</span>
-            <span className="text-xs font-mono text-muted">6 awaiting approval</span>
+            <span className="text-xs font-mono text-teal bg-teal-tint px-2.5 py-1 rounded">
+              {activeSessionsCount} of {sessions.length || 30} active banks
+            </span>
+            <span className="text-xs font-mono text-muted">
+              {Math.max(0, (sessions.length || 30) - activeSessionsCount)} awaiting approval
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Rules Banner Cards */}
+      {/* Rules Banner Cards (PRD Section 5.5) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
         <div className="bg-surface p-4 rounded-[6px] border border-border">
           <div className="text-muted text-[11px] uppercase mb-1">Pre-test · before the lab</div>
@@ -60,25 +72,27 @@ export const Step5TestBanks: React.FC = () => {
         </div>
       </div>
 
-      {/* 30 Session Chips */}
+      {/* 30 Session Chips Grid */}
       <div className="bg-surface p-4 rounded-[6px] border border-border">
         <div className="text-xs font-mono text-muted uppercase tracking-wider mb-3">
           Select Session Bank
         </div>
-        <div className="grid grid-cols-10 gap-1.5 font-mono text-xs text-center">
-          {sessionNumbers.map((num) => {
-            const isSelected = selectedSession === num;
-            const isApproved = num <= 14;
+        <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 font-mono text-xs text-center">
+          {Array.from({ length: 30 }, (_, i) => i + 1).map((num) => {
+            const isSelected = selectedSessionNum === num;
+            const targetSession = sessions.find((s) => s.n === num);
+            const isApproved = targetSession ? targetSession.status === 'active' : num <= 14;
+
             return (
               <button
                 key={num}
-                onClick={() => setSelectedSession(num)}
+                onClick={() => setSelectedSessionNum(num)}
                 className={`py-1.5 rounded transition-all ${
                   isSelected
                     ? 'bg-rail text-white font-semibold ring-2 ring-teal'
                     : isApproved
                     ? 'bg-teal-tint text-teal font-medium hover:bg-teal hover:text-white'
-                    : 'bg-surface-alt text-muted hover:bg-paper'
+                    : 'bg-surface-alt border border-border text-muted hover:border-ink hover:text-ink'
                 }`}
               >
                 S{num}
@@ -88,116 +102,113 @@ export const Step5TestBanks: React.FC = () => {
         </div>
       </div>
 
-      {/* S13 Banks Breakdown */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-base text-ink">S{selectedSession} · 1-D arrays</span>
-            <span className="text-xs text-muted">AI draft. Sample questions shown below for switch/replace.</span>
+      {/* Selected Session Bank Detail */}
+      {currentSession ? (
+        <div className="bg-surface p-5 rounded-[6px] border border-border space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-semibold text-ink text-base">
+                  S{currentSession.n} · {currentSession.topic}
+                </span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#2A2926]/5 text-muted">
+                  {currentSession.co_id} · {currentSession.btl}
+                </span>
+              </div>
+              <p className="text-xs text-muted mt-0.5">
+                AI draft. Replace any question, then approve to activate. Sample questions shown are for this bank.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {currentSession.status === 'draft' ? (
+                <button
+                  onClick={() => approveSession(currentSession.id)}
+                  className="px-4 py-2 bg-teal text-white rounded-[6px] text-xs font-mono font-medium hover:bg-[#0b4b42] flex items-center gap-1.5 shadow-sm"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Approve and activate</span>
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-teal-tint text-teal rounded-[6px] text-xs font-mono font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Bank Approved & Active</span>
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Pre vs Post Bank Toggle */}
+          <div className="flex items-center gap-4 text-xs font-mono border-b border-border pb-2">
             <button
-              onClick={() => useAICredit(`Regenerate S${selectedSession} question bank`)}
-              className="px-3 py-1.5 bg-surface text-ink border border-border rounded-[6px] text-xs font-medium hover:bg-surface-alt flex items-center gap-1.5"
+              onClick={() => setActiveTab('pre')}
+              className={`pb-2 border-b-2 font-semibold transition-colors ${
+                activeTab === 'pre'
+                  ? 'border-teal text-teal'
+                  : 'border-transparent text-muted hover:text-ink'
+              }`}
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Regenerate bank</span>
+              Pre-test bank (45 items · 2E, 2M, 1H per paper)
             </button>
-            <button className="px-4 py-1.5 bg-teal text-white rounded-[6px] text-xs font-medium hover:bg-[#0b4b42]">
-              Approve and activate
+            <button
+              onClick={() => setActiveTab('post')}
+              className={`pb-2 border-b-2 font-semibold transition-colors ${
+                activeTab === 'post'
+                  ? 'border-teal text-teal'
+                  : 'border-transparent text-muted hover:text-ink'
+              }`}
+            >
+              Post-test bank (45 items · 1E, 2M, 2H per paper)
             </button>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Pre-test bank sample */}
-          <div className="bg-surface p-5 rounded-[6px] border border-border space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div>
-                <span className="font-semibold text-sm text-ink">Pre-test bank</span>
-                <span className="text-xs text-muted block">45 total · 15 Easy, 15 Medium, 15 Hard</span>
-              </div>
-              <span className="font-mono text-xs px-2 py-0.5 bg-teal-tint text-teal rounded">
-                2E 2M 1H per paper
-              </span>
-            </div>
+          {/* Bank Items List Preview */}
+          <div className="space-y-3 font-mono text-xs">
+            {currentBankItems.slice(0, 6).map((item, idx) => (
+              <div
+                key={item.id}
+                className="p-3 rounded border border-border bg-surface-alt/40 flex items-start justify-between gap-4"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-ink">Q{idx + 1}</span>
+                    <span className={`px-1.5 py-0.2 rounded text-[10px] font-medium ${
+                      item.level === 'Easy'
+                        ? 'bg-teal-tint text-teal'
+                        : item.level === 'Medium'
+                        ? 'bg-assist-tint text-assist'
+                        : 'bg-danger-tint text-danger'
+                    }`}>
+                      {item.level}
+                    </span>
+                    <span className="text-muted text-[11px]">{item.stem}</span>
+                  </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3 bg-surface-alt rounded-[6px] border border-border">
-                <div className="flex items-center justify-between text-muted text-[11px] mb-1 font-mono">
-                  <span>EASY · 15 IN BANK</span>
-                  <button className="text-teal hover:underline">Replace</button>
+                  <div className="text-[11px] text-muted space-x-3 pl-6">
+                    <span>Correct Answer: {item.options[item.answer]}</span>
+                  </div>
                 </div>
-                <div className="font-medium text-ink mb-1.5">What is the index of the first element in a C array?</div>
-                <div className="grid grid-cols-2 gap-1 text-[11px] text-muted">
-                  <div className="text-teal font-medium">✓ A. 0</div>
-                  <div>B. 1</div>
-                  <div>C. -1</div>
-                  <div>D. Undefined</div>
-                </div>
-              </div>
 
-              <div className="p-3 bg-surface-alt rounded-[6px] border border-border">
-                <div className="flex items-center justify-between text-muted text-[11px] mb-1 font-mono">
-                  <span>MEDIUM · 15 IN BANK</span>
-                  <button className="text-teal hover:underline">Replace</button>
-                </div>
-                <div className="font-medium text-ink mb-1.5">Which expression gives the number of elements in int a[20]?</div>
-                <div className="grid grid-cols-2 gap-1 text-[11px] text-muted">
-                  <div>A. sizeof(a)</div>
-                  <div className="text-teal font-medium">✓ B. sizeof(a)/sizeof(a[0])</div>
-                  <div>C. len(a)</div>
-                  <div>D. a.length</div>
-                </div>
+                <button
+                  onClick={() => useAICredit(`Regenerate question ${idx + 1}`)}
+                  className="text-muted hover:text-ink text-[11px] flex items-center gap-1 shrink-0"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Replace</span>
+                </button>
               </div>
-            </div>
-          </div>
+            ))}
 
-          {/* Post-test bank sample */}
-          <div className="bg-surface p-5 rounded-[6px] border border-border space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div>
-                <span className="font-semibold text-sm text-ink">Post-test bank</span>
-                <span className="text-xs text-muted block">45 total · 15 Easy, 15 Medium, 15 Hard</span>
-              </div>
-              <span className="font-mono text-xs px-2 py-0.5 bg-teal-tint text-teal rounded">
-                1E 2M 2H per paper
-              </span>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3 bg-surface-alt rounded-[6px] border border-border">
-                <div className="flex items-center justify-between text-muted text-[11px] mb-1 font-mono">
-                  <span>EASY · 15 IN BANK</span>
-                  <button className="text-teal hover:underline">Replace</button>
-                </div>
-                <div className="font-medium text-ink mb-1.5">What is the time complexity of reversing an array of size n in-place?</div>
-                <div className="grid grid-cols-2 gap-1 text-[11px] text-muted">
-                  <div>A. O(1)</div>
-                  <div className="text-teal font-medium">✓ B. O(n)</div>
-                  <div>C. O(n^2)</div>
-                  <div>D. O(log n)</div>
-                </div>
-              </div>
-
-              <div className="p-3 bg-surface-alt rounded-[6px] border border-border">
-                <div className="flex items-center justify-between text-muted text-[11px] mb-1 font-mono">
-                  <span>HARD · 15 IN BANK</span>
-                  <button className="text-teal hover:underline">Replace</button>
-                </div>
-                <div className="font-medium text-ink mb-1.5">To pass a 1D array to a function without copy overhead, C passes it as:</div>
-                <div className="grid grid-cols-2 gap-1 text-[11px] text-muted">
-                  <div>A. Value copy</div>
-                  <div className="text-teal font-medium">✓ B. Pointer to first element</div>
-                  <div>C. Reference slice</div>
-                  <div>D. Stack clone</div>
-                </div>
-              </div>
+            <div className="text-center pt-2 text-[11px] font-mono text-muted">
+              + {Math.max(0, currentBankItems.length - 6)} more vetted questions in this bucket
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-surface p-10 rounded-[6px] border border-dashed border-border text-center font-mono text-xs text-muted">
+          Please generate the session plan in Step 3 to view and approve test banks.
+        </div>
+      )}
     </div>
   );
 };

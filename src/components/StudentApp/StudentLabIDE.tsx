@@ -8,10 +8,13 @@ export const StudentLabIDE: React.FC = () => {
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [selectedLang, setSelectedLang] = useState<'c' | 'cpp' | 'java' | 'python' | 'rust' | 'go'>('c');
 
-  // Find active session or first session with questions
-  const currentSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
-  const questions = currentSession?.questions || [];
-  const currentQuestion = questions[activeQuestionIndex];
+  // Find active session or currently running session
+  const currentSession =
+    sessions.find((s) => s.id === activeSessionId && s.status === 'active') ||
+    sessions.find((s) => s.status === 'active') ||
+    sessions[0];
+  const questions = (currentSession?.questions || []).filter((q) => q.is_selected);
+  const currentQuestion = questions[activeQuestionIndex] || questions[0];
 
   // Clean starter code templates (no pre-filled answers)
   const defaultStarters: Record<string, string> = {
