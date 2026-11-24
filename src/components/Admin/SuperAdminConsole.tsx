@@ -8,12 +8,17 @@ export const SuperAdminConsole: React.FC<{ onSignOut: () => void }> = ({ onSignO
   const [activeTab, setActiveTab] = useState<'users' | 'subscriptions' | 'credits' | 'audit'>('credits');
 
   const facultyCredits = [
-    { name: 'Dr. Ramesh Kulkarni (Demo)', email: 'faculty.demo@sanjivani.edu.in', plan: 'Pro', validUntil: '3 Jul 2027', used: 38, cap: 125, todayUsed: 3, todayCap: 5, status: 'OK' },
-    { name: 'Faculty B', email: 'faculty.b@sanjivani.edu.in', plan: 'Pro', validUntil: '3 Jul 2027', used: 112, cap: 125, todayUsed: 5, todayCap: 5, status: 'Daily cap reached' },
-    { name: 'Faculty C', email: 'faculty.c@sanjivani.edu.in', plan: 'Elite', validUntil: '28 Feb 2028', used: 141, cap: 250, todayUsed: 2, todayCap: 7, status: 'OK' },
-    { name: 'Faculty D', email: 'faculty.d@sanjivani.edu.in', plan: 'Pro', validUntil: '3 Jul 2027', used: 125, cap: 125, todayUsed: 0, todayCap: 5, status: 'Subscription runs used up' },
-    { name: 'Faculty E', email: 'faculty.e@sanjivani.edu.in', plan: 'Pro', validUntil: '3 Jul 2027', used: 64, cap: 125, todayUsed: 1, todayCap: 5, status: 'OK' },
-    { name: 'Faculty F', email: 'faculty.f@sanjivani.edu.in', plan: 'Elite', validUntil: '28 Feb 2028', used: 207, cap: 250, todayUsed: 7, todayCap: 7, status: 'Daily cap reached' },
+    {
+      name: 'Faculty In-Charge',
+      email: `faculty@${institution.email_domain || 'university.edu'}`,
+      plan: institution.plan,
+      validUntil: institution.plan_end,
+      used: institution.ai_used_total,
+      cap: institution.ai_total_cap,
+      todayUsed: institution.ai_used_today,
+      todayCap: institution.ai_daily_cap,
+      status: 'Active',
+    },
   ];
 
   return (
@@ -22,7 +27,7 @@ export const SuperAdminConsole: React.FC<{ onSignOut: () => void }> = ({ onSignO
       <header className="h-14 bg-rail text-white px-6 flex items-center justify-between border-b border-[#262624] select-none">
         <div className="flex items-center gap-4">
           <XeIOLogo variant="dark" suffix="Super admin" size="md" />
-          <span className="text-xs font-mono text-muted">All rights · Sanjivani University</span>
+          <span className="text-xs font-mono text-muted">All rights · {institution.name}</span>
         </div>
 
         <nav className="flex items-center gap-1 font-mono text-xs">
@@ -215,21 +220,9 @@ export const SuperAdminConsole: React.FC<{ onSignOut: () => void }> = ({ onSignO
             <div className="space-y-2 text-xs font-mono">
               <div className="p-3 bg-surface-alt rounded border border-border flex justify-between">
                 <div>
-                  <span className="font-semibold text-ink">APPROVAL:</span> Course Plan CSL-101 approved by hod.cse@sanjivani.edu.in
+                  <span className="font-semibold text-ink">SYSTEM:</span> Production instance provisioned for {institution.name}
                 </div>
-                <span className="text-muted">Today 10:04 IST</span>
-              </div>
-              <div className="p-3 bg-surface-alt rounded border border-border flex justify-between">
-                <div>
-                  <span className="font-semibold text-ink">SUBMISSION:</span> Student 2301044 submitted main.c (All 5 tests passed)
-                </div>
-                <span className="text-muted">Today 10:48 IST</span>
-              </div>
-              <div className="p-3 bg-surface-alt rounded border border-border flex justify-between">
-                <div>
-                  <span className="font-semibold text-ink">LOGIN:</span> SSO authentication verified for dr.ramesh.kulkarni
-                </div>
-                <span className="text-muted">Today 09:45 IST</span>
+                <span className="text-muted">Today IST</span>
               </div>
             </div>
           </div>
@@ -239,7 +232,7 @@ export const SuperAdminConsole: React.FC<{ onSignOut: () => void }> = ({ onSignO
         {activeTab === 'users' && (
           <div className="bg-surface p-6 rounded-[6px] border border-border space-y-4">
             <h2 className="text-lg font-semibold text-ink">Institutional User Management</h2>
-            <p className="text-xs text-muted">All active users strictly mapped to @sanjivani.edu.in or @elzeo.in</p>
+            <p className="text-xs text-muted">All active users strictly mapped to @{institution.email_domain || 'university.edu'} or @elzeo.in</p>
           </div>
         )}
       </main>

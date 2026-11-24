@@ -4,7 +4,7 @@ import { XeIOLogo, ElzeoLogo, FooterBranding } from '../Brand';
 import { CheckCircle2, Clock, AlertTriangle, Send, FileCheck, Shield, ChevronRight } from 'lucide-react';
 
 export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
-  const { planStatus, hodPlanDecision, hodPlanRemark } = useApp();
+  const { planStatus, hodPlanDecision, hodPlanRemark, course, cos, batches } = useApp();
   const [activeTab, setActiveTab] = useState<'approvals' | 'courses' | 'live' | 'final_marks'>('approvals');
   const [remarkText, setRemarkText] = useState('');
   const [selectedItem, setSelectedItem] = useState<'plan' | 'endsem' | 'finalmarks'>('plan');
@@ -15,15 +15,15 @@ export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) =
       <header className="h-14 bg-rail text-white px-6 flex items-center justify-between border-b border-[#262624] select-none">
         <div className="flex items-center gap-4">
           <XeIOLogo variant="dark" suffix="HOD" size="md" />
-          <span className="text-xs font-mono text-muted">Computer Science and Engineering · SET</span>
+          <span className="text-xs font-mono text-muted">Academic Department Oversight</span>
         </div>
 
         <nav className="flex items-center gap-1 font-mono text-xs">
           {(['approvals', 'courses', 'live', 'final_marks'] as const).map((tab) => {
             const labels = {
-              approvals: 'Approvals (3)',
-              courses: 'Courses (8)',
-              live: 'Live Monitor (1)',
+              approvals: `Approvals (${planStatus === 'sent' ? 1 : 0})`,
+              courses: `Courses (${course.code ? 1 : 0})`,
+              live: `Live Monitor (${batches.length > 0 ? 1 : 0})`,
               final_marks: 'Final Marks Pipeline',
             };
             return (
@@ -62,38 +62,22 @@ export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) =
               </div>
 
               <div className="space-y-2">
-                <div
-                  onClick={() => setSelectedItem('plan')}
-                  className={`p-3 rounded border cursor-pointer transition-colors ${
-                    selectedItem === 'plan' ? 'bg-surface-alt border-teal ring-1 ring-teal' : 'border-border hover:bg-surface-alt'
-                  }`}
-                >
-                  <div className="text-[10px] font-mono text-muted uppercase">Course plan</div>
-                  <div className="font-semibold text-xs text-ink">CSL-101 · Programming in C Lab</div>
-                  <div className="text-[11px] text-muted mt-0.5">Dr. Ramesh · 5 COs, Rubric 50 marks</div>
-                </div>
-
-                <div
-                  onClick={() => setSelectedItem('endsem')}
-                  className={`p-3 rounded border cursor-pointer transition-colors ${
-                    selectedItem === 'endsem' ? 'bg-surface-alt border-teal ring-1 ring-teal' : 'border-border hover:bg-surface-alt'
-                  }`}
-                >
-                  <div className="text-[10px] font-mono text-muted uppercase">End-sem question set</div>
-                  <div className="font-semibold text-xs text-ink">CSL-102 · Data Structures Lab</div>
-                  <div className="text-[11px] text-muted mt-0.5">30 questions approved by faculty · Batch B</div>
-                </div>
-
-                <div
-                  onClick={() => setSelectedItem('finalmarks')}
-                  className={`p-3 rounded border cursor-pointer transition-colors ${
-                    selectedItem === 'finalmarks' ? 'bg-surface-alt border-teal ring-1 ring-teal' : 'border-border hover:bg-surface-alt'
-                  }`}
-                >
-                  <div className="text-[10px] font-mono text-muted uppercase">Final marks</div>
-                  <div className="font-semibold text-xs text-ink">CSL-202 · Object Oriented Lab</div>
-                  <div className="text-[11px] text-muted mt-0.5">Internal marks out of 100 ready for CoE</div>
-                </div>
+                {planStatus === 'sent' ? (
+                  <div
+                    onClick={() => setSelectedItem('plan')}
+                    className={`p-3 rounded border cursor-pointer transition-colors ${
+                      selectedItem === 'plan' ? 'bg-surface-alt border-teal ring-1 ring-teal' : 'border-border hover:bg-surface-alt'
+                    }`}
+                  >
+                    <div className="text-[10px] font-mono text-muted uppercase">Course plan</div>
+                    <div className="font-semibold text-xs text-ink">{course.code || 'Course'} · {course.title || 'Laboratory Course'}</div>
+                    <div className="text-[11px] text-muted mt-0.5">{course.facultyInCharge || 'Faculty'} · {cos.length} COs, Rubric 50 marks</div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-surface-alt rounded border border-border text-center text-xs font-mono text-muted">
+                    No items pending HOD approval
+                  </div>
+                )}
               </div>
             </div>
 
@@ -103,9 +87,11 @@ export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) =
                 <div className="text-xs font-mono text-muted uppercase tracking-wider mb-1">
                   Course plan and mark scheme review
                 </div>
-                <h2 className="text-xl font-semibold text-ink">CSL-101 · Programming in C Lab</h2>
+                <h2 className="text-xl font-semibold text-ink">
+                  {course.code ? `${course.code} · ${course.title}` : 'Laboratory Course Plan'}
+                </h2>
                 <div className="text-xs text-muted font-mono mt-0.5">
-                  Demo Faculty · 5 COs with Bloom levels · CO–PO map · 30 sessions, 6 Jan – 5 May
+                  {course.facultyInCharge || 'Faculty'} · {cos.length} COs with Bloom levels · CO–PO map
                 </div>
               </div>
 
@@ -230,26 +216,24 @@ export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) =
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                <tr>
-                  <td className="p-3 font-semibold text-ink">CSL-101 Programming in C Lab</td>
-                  <td className="p-3 text-muted">Dr. Ramesh Kulkarni</td>
-                  <td className="p-3 text-center">14 / 30</td>
-                  <td className="p-3 text-center text-teal font-bold">82%</td>
-                  <td className="p-3 text-center text-teal">Attained (4/5)</td>
-                  <td className="p-3 text-right">
-                    <span className="px-2 py-0.5 bg-teal-tint text-teal rounded text-[11px]">Active</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="p-3 font-semibold text-ink">CSL-102 Data Structures Lab</td>
-                  <td className="p-3 text-muted">Prof. Priya Sharma</td>
-                  <td className="p-3 text-center">12 / 30</td>
-                  <td className="p-3 text-center text-ink font-bold">78%</td>
-                  <td className="p-3 text-center text-teal">Attained (5/5)</td>
-                  <td className="p-3 text-right">
-                    <span className="px-2 py-0.5 bg-teal-tint text-teal rounded text-[11px]">Active</span>
-                  </td>
-                </tr>
+                {course.code ? (
+                  <tr>
+                    <td className="p-3 font-semibold text-ink">{course.code} {course.title}</td>
+                    <td className="p-3 text-muted">{course.facultyInCharge || 'Faculty'}</td>
+                    <td className="p-3 text-center">{batches.length} Batches</td>
+                    <td className="p-3 text-center text-teal font-bold">{planStatus}</td>
+                    <td className="p-3 text-center text-teal">{cos.length} COs</td>
+                    <td className="p-3 text-right">
+                      <span className="px-2 py-0.5 bg-teal-tint text-teal rounded text-[11px]">Active</span>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-xs text-muted font-mono">
+                      No lab courses registered in department yet.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -263,21 +247,27 @@ export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) =
                 <h2 className="text-lg font-semibold text-ink">Active Labs in Department</h2>
                 <p className="text-xs text-muted">Real-time attendance, test status and proctor flags (Read-only)</p>
               </div>
-              <span className="px-2 py-0.5 bg-teal-tint text-teal rounded text-xs font-mono font-medium flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-teal animate-pulse"></span>
-                1 Lab Running
+              <span className="px-2 py-0.5 bg-surface-alt text-muted rounded text-xs font-mono font-medium flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${batches.length > 0 ? 'bg-teal animate-pulse' : 'bg-[#73726B]'}`}></span>
+                {batches.length > 0 ? '1 Lab Running' : '0 Labs Running'}
               </span>
             </div>
 
-            <div className="p-4 bg-surface-alt rounded border border-border flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-sm text-ink">CSL-101 · Programming in C Lab (Batch A)</div>
-                <div className="text-xs text-muted font-mono mt-0.5">
-                  Lab 304 · 60 Present · 23 Passed Visible · 6 Flagged Struggling
+            {batches.length > 0 ? (
+              <div className="p-4 bg-surface-alt rounded border border-border flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-sm text-ink">{course.code || 'Course'} · {batches[0].name}</div>
+                  <div className="text-xs text-muted font-mono mt-0.5">
+                    {batches[0].room} · {batches[0].students_count} Students Enrolled
+                  </div>
                 </div>
+                <span className="text-xs font-mono text-teal">Monitor healthy</span>
               </div>
-              <span className="text-xs font-mono text-teal">Monitor healthy</span>
-            </div>
+            ) : (
+              <div className="p-8 text-center text-xs text-muted font-mono bg-surface-alt rounded border border-border">
+                No active department lab sessions running at this time.
+              </div>
+            )}
           </div>
         )}
 
@@ -287,7 +277,7 @@ export const HODConsole: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) =
             <h2 className="text-lg font-semibold text-ink">Final Marks Pipeline</h2>
             <div className="p-4 bg-surface-alt rounded border border-border text-xs font-mono space-y-2">
               <div className="font-semibold text-ink">Pipeline Status: Faculty Submitted → HOD Approved → CoE Accepted</div>
-              <div className="text-muted">CSL-101 marks will populate automatically upon completion of Session 30 and End-sem practical.</div>
+              <div className="text-muted">Final marks will populate automatically upon completion of laboratory sessions and the End-sem practical exam.</div>
             </div>
           </div>
         )}

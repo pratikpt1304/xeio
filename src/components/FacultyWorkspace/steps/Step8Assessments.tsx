@@ -3,16 +3,16 @@ import { useApp } from '../../../context/AppContext';
 import { CheckCircle2, AlertTriangle, Shield, Clock, Users, FileSpreadsheet, Lock } from 'lucide-react';
 
 export const Step8Assessments: React.FC = () => {
-  const { endSem, setEndSemStage, useAICredit } = useApp();
-  const [selectedBatchTab, setSelectedBatchTab] = useState<'A' | 'B'>('A');
+  const { endSem, setEndSemStage, useAICredit, batches } = useApp();
+  const [selectedBatchTab, setSelectedBatchTab] = useState<string>(batches[0]?.name || 'Batch 1');
 
   const stages = [
-    { num: 1, name: 'Rules', status: 'done' },
-    { num: 2, name: 'Generate and approve', status: 'done', meta: '30/30' },
-    { num: 3, name: 'HOD approval', status: 'done' },
-    { num: 4, name: 'Schedule', status: 'done', meta: '2027-05-10' },
-    { num: 5, name: 'Attendance and conduct', status: 'live' },
-    { num: 6, name: 'Marks and attainment', status: 'pending' },
+    { num: 1, name: 'Rules', status: endSem.stage > 1 ? 'done' : endSem.stage === 1 ? 'live' : 'pending' },
+    { num: 2, name: 'Generate and approve', status: endSem.stage > 2 ? 'done' : endSem.stage === 2 ? 'live' : 'pending', meta: `${endSem.approved_30_count}/30` },
+    { num: 3, name: 'HOD approval', status: endSem.stage > 3 ? 'done' : endSem.stage === 3 ? 'live' : 'pending' },
+    { num: 4, name: 'Schedule', status: endSem.stage > 4 ? 'done' : endSem.stage === 4 ? 'live' : 'pending' },
+    { num: 5, name: 'Attendance and conduct', status: endSem.stage > 5 ? 'done' : endSem.stage === 5 ? 'live' : 'pending' },
+    { num: 6, name: 'Marks and attainment', status: endSem.stage === 6 ? 'live' : 'pending' },
   ];
 
   return (
@@ -32,22 +32,21 @@ export const Step8Assessments: React.FC = () => {
 
           {/* Batch Selector */}
           <div className="flex items-center gap-1 bg-surface p-1 rounded-[6px] border border-border font-mono text-xs">
-            <button
-              onClick={() => setSelectedBatchTab('A')}
-              className={`px-3 py-1 rounded transition-colors ${
-                selectedBatchTab === 'A' ? 'bg-rail text-white font-medium' : 'text-muted hover:text-ink'
-              }`}
-            >
-              Batch A
-            </button>
-            <button
-              onClick={() => setSelectedBatchTab('B')}
-              className={`px-3 py-1 rounded transition-colors ${
-                selectedBatchTab === 'B' ? 'bg-rail text-white font-medium' : 'text-muted hover:text-ink'
-              }`}
-            >
-              Batch B
-            </button>
+            {batches.length > 0 ? (
+              batches.map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => setSelectedBatchTab(b.name)}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    selectedBatchTab === b.name ? 'bg-rail text-white font-medium' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  {b.name}
+                </button>
+              ))
+            ) : (
+              <span className="px-3 py-1 text-muted text-[11px]">No batches</span>
+            )}
           </div>
         </div>
       </div>
@@ -115,7 +114,7 @@ export const Step8Assessments: React.FC = () => {
               {/* Attendance Grid */}
               <div className="lg:col-span-2 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-semibold text-ink">Attendance · Batch A end-sem</span>
+                  <span className="font-semibold text-ink">Attendance · {selectedBatchTab} end-sem</span>
                   <span className="text-muted">60 present · 3 absent</span>
                 </div>
 
@@ -268,7 +267,7 @@ export const Step8Assessments: React.FC = () => {
             {/* End-sem CO attainment bars */}
             <div className="pt-4 border-t border-border">
               <div className="text-xs font-mono text-muted uppercase tracking-wider mb-2">
-                End-sem CO attainment · Batch A
+                End-sem CO attainment · {selectedBatchTab}
               </div>
               <div className="space-y-2 text-xs font-mono">
                 <div className="flex items-center gap-3">

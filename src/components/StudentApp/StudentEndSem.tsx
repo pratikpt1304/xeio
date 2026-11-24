@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { Shield, CheckCircle2, AlertTriangle, Eye, Video, Mic, Monitor, Lock, Play } from 'lucide-react';
 
 export const StudentEndSem: React.FC = () => {
+  const { course } = useApp();
   const [examStarted, setExamStarted] = useState(false);
   const [activeQ, setActiveQ] = useState<1 | 2>(1);
   const [code, setCode] = useState<string>(
@@ -36,7 +37,9 @@ int main() {
         /* Secure Check and Waiting Room (PRD Page 26) */
         <div className="p-6 md:p-12 max-w-4xl mx-auto space-y-6">
           <div>
-            <h1 className="text-2xl font-semibold text-ink">End-sem practical · CSL-101</h1>
+            <h1 className="text-2xl font-semibold text-ink">
+              End-sem practical {course.code ? `· ${course.code}` : ''}
+            </h1>
             <p className="text-xs text-muted mt-1 font-mono">
               Secure check and waiting room. You can start only after your faculty marks you present and activates the test for your batch.
             </p>
@@ -49,7 +52,7 @@ int main() {
 
             <div className="divide-y divide-border text-xs font-mono">
               <div className="py-2.5 flex justify-between items-center">
-                <span>Signed in with institutional SSO (@sanjivani.edu.in)</span>
+                <span>Signed in with verified institutional credentials</span>
                 <span className="text-teal font-semibold">✓ verified</span>
               </div>
               <div className="py-2.5 flex justify-between items-center">
@@ -87,7 +90,7 @@ int main() {
               <div>
                 <div className="font-semibold text-ink text-xs">All checks passed</div>
                 <div className="text-[11px] text-muted">
-                  Batch A practical exam is live. 2 questions drawn randomly from the approved 30.
+                  End-sem practical exam is live. 2 questions drawn randomly from the approved 30 pool.
                 </div>
               </div>
 
@@ -106,7 +109,7 @@ int main() {
           {/* Top Bar with Proctor Status */}
           <div className="h-11 bg-[#141413] px-4 flex items-center justify-between border-b border-[#2E2E2C] text-xs font-mono">
             <div className="flex items-center gap-3">
-              <span className="font-semibold text-white">End-sem practical · CSL-101 · Batch A</span>
+              <span className="font-semibold text-white">End-sem practical examination</span>
               <button
                 onClick={() => setActiveQ(1)}
                 className={`px-2 py-0.5 rounded ${activeQ === 1 ? 'bg-[#2E2E2B] text-white' : 'text-muted'}`}

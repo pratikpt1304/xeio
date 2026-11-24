@@ -214,7 +214,7 @@ export const Step2Batches: React.FC = () => {
             <p className="text-muted text-[11px]">Enter student names (one per line):</p>
             <form onSubmit={handleRosterSubmit} className="space-y-3">
               <textarea
-                placeholder="Aarav Sharma&#10;Priya Patel&#10;Rohan Verma"
+                placeholder="Student Name 1&#10;Student Name 2&#10;Student Name 3"
                 value={rosterText}
                 onChange={(e) => setRosterText(e.target.value)}
                 className="w-full p-2 bg-surface-alt border border-border rounded font-mono"

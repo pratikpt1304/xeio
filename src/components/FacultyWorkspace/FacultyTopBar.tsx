@@ -5,7 +5,7 @@ import { Search, Sparkles } from 'lucide-react';
 export const FacultyTopBar: React.FC<{
   onSelectStep: (step: number) => void;
 }> = ({ onSelectStep }) => {
-  const { institution, useAICredit, aiMessage, clearAIMessage, setSelectedStudentForDetail, students } = useApp();
+  const { institution, batches, useAICredit, aiMessage, clearAIMessage } = useApp();
   const [askInput, setAskInput] = useState('');
 
   const handleAskSubmit = (e: React.FormEvent) => {
@@ -13,17 +13,17 @@ export const FacultyTopBar: React.FC<{
     const query = askInput.toLowerCase().trim();
     if (!query) return;
 
-    if (query.includes("today's session") || query.includes("s13") || query.includes("live") || query.includes("session")) {
+    if (query.includes("session") || query.includes("live") || query.includes("lab")) {
       onSelectStep(6);
-    } else if (query.includes("2301044") || query.includes("submissions") || query.includes("aarav")) {
-      onSelectStep(6);
-      const student = students.find((s) => s.roll === '2301044');
-      if (student) setSelectedStudentForDetail(student);
-    } else if (query.includes("course file") || query.includes("report") || query.includes("download")) {
+    } else if (query.includes("course") || query.includes("setup")) {
+      onSelectStep(1);
+    } else if (query.includes("batch") || query.includes("student")) {
+      onSelectStep(2);
+    } else if (query.includes("report") || query.includes("download") || query.includes("file")) {
       onSelectStep(9);
     } else if (query.includes("question") || query.includes("bank")) {
       onSelectStep(4);
-    } else if (query.includes("assessment") || query.includes("end-sem") || query.includes("exam")) {
+    } else if (query.includes("assessment") || query.includes("exam")) {
       onSelectStep(8);
     } else {
       useAICredit(`Query: "${askInput}"`);
@@ -56,10 +56,17 @@ export const FacultyTopBar: React.FC<{
       {/* Status Badges & AI Meter */}
       <div className="flex items-center gap-4 text-xs font-mono">
         {/* Live Lab Indicator */}
-        <div className="flex items-center gap-2 px-2.5 py-1 bg-surface-alt border border-border rounded-[6px]">
-          <span className="w-2 h-2 rounded-full bg-teal animate-pulse"></span>
-          <span className="text-ink font-medium">Batch A lab 10:00</span>
-        </div>
+        {batches.length > 0 ? (
+          <div className="flex items-center gap-2 px-2.5 py-1 bg-surface-alt border border-border rounded-[6px]">
+            <span className="w-2 h-2 rounded-full bg-teal animate-pulse"></span>
+            <span className="text-ink font-medium">{batches[0].name} ({batches[0].slot || 'Active'})</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-2.5 py-1 bg-surface-alt border border-border rounded-[6px] text-muted">
+            <span className="w-2 h-2 rounded-full bg-[#73726B]"></span>
+            <span>No active session</span>
+          </div>
+        )}
 
         {/* AI Credit Meter */}
         <div className="flex items-center gap-2 px-2.5 py-1 bg-surface-alt border border-border rounded-[6px]">

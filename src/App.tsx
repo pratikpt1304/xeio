@@ -14,6 +14,11 @@ const AppContent: React.FC = () => {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   useEffect(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {}
+
     // Check existing Supabase session on startup
     if (supabase) {
       supabase.auth.getSession().then(({ data: { session } }) => {

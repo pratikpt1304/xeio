@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   User,
   Role,
@@ -89,6 +89,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState<StudentProgress | null>(null);
+
+  // Clear any residual cached data on start
+  useEffect(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {}
+  }, []);
 
   const switchRole = (role: Role) => {
     const matchedUser = defaultUsers.find((u) => u.roles.includes(role)) || {
@@ -277,29 +285,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loadDemoData = () => {
-    setCourse({
-      code: 'CSL-101',
-      title: 'Programming in C Lab',
-      ltpc: '0-0-2-1',
-      semester: 'IV · 2026–27',
-      department: 'Computer Science and Engineering',
-      className: 'SY-B',
-      facultyInCharge: 'Dr. Ramesh Kulkarni',
-      hodEmail: 'hod.cse@sanjivani.edu.in',
-    });
-    setCOs([
-      { id: 'co-1', code: 'CO1', statement: 'Write C programs using input, output, operators and decisions', btl: 'L3 Apply', target_percentage: 60 },
-      { id: 'co-2', code: 'CO2', statement: 'Use loops to solve iterative problems and patterns', btl: 'L3 Apply', target_percentage: 60 },
-      { id: 'co-3', code: 'CO3', statement: 'Process arrays and strings with searching and sorting', btl: 'L4 Analyse', target_percentage: 60 },
-      { id: 'co-4', code: 'CO4', statement: 'Design modular programs with functions and pointers', btl: 'L4 Analyse', target_percentage: 60 },
-      { id: 'co-5', code: 'CO5', statement: 'Manage records with structures and binary files', btl: 'L6 Create', target_percentage: 60 },
-    ]);
-    setBatches([
-      { id: 'b-1', name: 'Batch A', class_code: 'CSL101-SYB-7Q4K', slot: 'Wednesday 10:00–12:00', room: 'Lab 304', students_count: 60 },
-      { id: 'b-2', name: 'Batch B', class_code: 'CSL101-SYB-9W2P', slot: 'Wednesday 14:00–16:00', room: 'Lab 304', students_count: 60 },
-    ]);
-    generateSessions();
-    setPlanStatus('approved');
+    clearAllData();
   };
 
   return (

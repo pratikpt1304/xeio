@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CourseFilePrintView } from '../reports/CourseFilePrintView';
-import { FileText, Download, CheckCircle2, ShieldCheck, Printer } from 'lucide-react';
+import { Download, ShieldCheck, Printer } from 'lucide-react';
 
 export const StudentLabFile: React.FC = () => {
-  const { students } = useApp();
+  const { students, currentUser, institution, course } = useApp();
   const [showPreview, setShowPreview] = useState(false);
 
-  const sampleStudent = students.find((s) => s.roll === '2301044') || students[0];
-  const verificationId = `XO-CSL101-${sampleStudent.roll}-7F3A`;
+  const activeStudent = students.find((s) => s.student_id === currentUser.id || s.roll === currentUser.roll_number) || {
+    name: currentUser.name,
+    roll: currentUser.roll_number || '2301001',
+    batch: 'Batch A',
+  };
+
+  const verificationId = `XO-${course.code || 'COURSE'}-${activeStudent.roll}-7F3A`;
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Lab file · CSL-101</h1>
+          <h1 className="text-2xl font-semibold text-ink">Lab File · {course.code || 'Course'}</h1>
           <p className="text-xs text-muted mt-1 font-mono">
             As of today. The final file is issued after the last working day and is needed to appear for the final practical.
           </p>
@@ -34,38 +39,38 @@ export const StudentLabFile: React.FC = () => {
       <div className="bg-surface p-8 rounded-[6px] border border-border space-y-8 font-sans">
         <div className="text-center space-y-3 pb-6 border-b border-border">
           <div className="text-xs uppercase font-mono tracking-wider text-muted">
-            SANJIVANI UNIVERSITY
+            {institution.name.toUpperCase()}
           </div>
           <div className="text-sm font-semibold text-ink">
-            School of Engineering and Technology · Department of Computer Science
+            {course.department || 'Academic Department'}
           </div>
           <h2 className="text-3xl font-serif font-bold text-ink pt-2">
             Laboratory Record
           </h2>
           <div className="text-sm font-semibold text-ink">
-            CSL-101 · Programming in C Lab
+            {course.code ? `${course.code} · ${course.title}` : 'Laboratory Course'}
           </div>
           <div className="text-xs font-mono text-muted">
-            L-T-P-C 0-0-2-1 · Semester IV · Academic year 2026–27
+            L-T-P-C {course.ltpc || '0-0-2-1'} · {course.semester || 'Current Semester'}
           </div>
         </div>
 
         <div className="max-w-md mx-auto w-full text-xs border border-border rounded divide-y divide-border">
           <div className="p-3 flex justify-between">
             <span className="text-muted">Name</span>
-            <span className="font-semibold text-ink">{sampleStudent.name}</span>
+            <span className="font-semibold text-ink">{activeStudent.name}</span>
           </div>
           <div className="p-3 flex justify-between font-mono">
             <span className="text-muted">Roll number</span>
-            <span className="font-bold text-ink">{sampleStudent.roll}</span>
+            <span className="font-bold text-ink">{activeStudent.roll}</span>
           </div>
           <div className="p-3 flex justify-between">
             <span className="text-muted">Class and batch</span>
-            <span className="text-ink">SY-B · Batch A</span>
+            <span className="text-ink">{course.className || 'General Section'}</span>
           </div>
           <div className="p-3 flex justify-between">
             <span className="text-muted">Faculty in-charge</span>
-            <span className="text-ink">Dr. Ramesh Kulkarni</span>
+            <span className="text-ink">{course.facultyInCharge || 'Faculty In-Charge'}</span>
           </div>
         </div>
 
@@ -78,15 +83,18 @@ export const StudentLabFile: React.FC = () => {
             </div>
           </div>
           <button
-            onClick={() => setShowPreview(true)}
-            className="text-teal hover:underline text-xs"
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-paper border border-border text-ink rounded text-xs hover:bg-surface"
           >
-            Open Full PDF Viewer →
+            <Printer className="w-3.5 h-3.5" />
+            <span>Print Sheet</span>
           </button>
         </div>
       </div>
 
-      {showPreview && <CourseFilePrintView onClose={() => setShowPreview(false)} />}
+      {showPreview && (
+        <CourseFilePrintView onClose={() => setShowPreview(false)} />
+      )}
     </div>
   );
 };

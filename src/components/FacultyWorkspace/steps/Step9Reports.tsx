@@ -224,7 +224,7 @@ export const Step9Reports: React.FC = () => {
               </div>
 
               <div className="pt-3 border-t border-border text-[11px] text-muted">
-                Normal distribution across 120 students in Batch A and B. Target threshold 60% aligns with NBA criteria.
+                Normal distribution across enrolled batch students. Target threshold 60% aligns with NBA criteria.
               </div>
             </div>
           </div>
