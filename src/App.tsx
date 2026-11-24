@@ -15,11 +15,19 @@ const AppContent: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('xeio_authenticated') === 'true';
   });
+
+  // View mode: 'landing' (always default on home root) | 'signin' | 'app'
   const [viewMode, setViewMode] = useState<'landing' | 'signin' | 'app'>(() => {
-    if (localStorage.getItem('xeio_authenticated') === 'true') return 'app';
-    if (window.location.hash.includes('login') || window.location.pathname.includes('/app')) return 'signin';
+    if (window.location.hash.includes('app') || window.location.pathname.startsWith('/app')) {
+      return localStorage.getItem('xeio_authenticated') === 'true' ? 'app' : 'signin';
+    }
+    if (window.location.hash.includes('login') || window.location.pathname.startsWith('/login')) {
+      return 'signin';
+    }
+    // Always default to the official Landing Page!
     return 'landing';
   });
+
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   useEffect(() => {
@@ -29,7 +37,6 @@ const AppContent: React.FC = () => {
 
     if (savedAuth === 'true') {
       setIsAuthenticated(true);
-      setViewMode('app');
       if (savedRole) {
         switchRole(savedRole);
       }
@@ -40,7 +47,6 @@ const AppContent: React.FC = () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
           setIsAuthenticated(true);
-          setViewMode('app');
           const role = (session.user.user_metadata?.role as any) || savedRole || 'faculty';
           switchRole(role);
           localStorage.setItem('xeio_authenticated', 'true');
@@ -52,7 +58,6 @@ const AppContent: React.FC = () => {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
           setIsAuthenticated(true);
-          setViewMode('app');
           localStorage.setItem('xeio_authenticated', 'true');
         }
       });
@@ -96,9 +101,21 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // 1. Landing Page View (Default for portal visitors)
-  if (viewMode === 'landing' && !isAuthenticated) {
-    return <LandingPage onSignInClick={() => setViewMode('signin')} />;
+  // 1. Landing Page View (ALWAYS DEFAULT on root /)
+  if (viewMode === 'landing') {
+    return (
+      <LandingPage
+        isAuthenticated={isAuthenticated}
+        userRole={currentUser.activeRole ? currentUser.activeRole.toUpperCase() : 'Faculty'}
+        onSignInClick={() => {
+          if (isAuthenticated) {
+            setViewMode('app');
+          } else {
+            setViewMode('signin');
+          }
+        }}
+      />
+    );
   }
 
   // 2. Sign In Screen View

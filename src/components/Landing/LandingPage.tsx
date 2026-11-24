@@ -3,11 +3,16 @@ import '../../landing/landing.css';
 
 interface LandingPageProps {
   onSignInClick: () => void;
+  isAuthenticated?: boolean;
+  userRole?: string;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onSignInClick }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onSignInClick,
+  isAuthenticated = false,
+  userRole = 'Faculty',
+}) => {
   useEffect(() => {
-    // Scroll to top on mount
     window.scrollTo(0, 0);
   }, []);
 
@@ -31,7 +36,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignInClick }) => {
             onClick={onSignInClick}
             className="go border-0 cursor-pointer text-white font-medium"
           >
-            Sign in
+            {isAuthenticated ? `Go to Portal (${userRole})` : 'Sign in'}
           </button>
         </nav>
       </header>
@@ -54,7 +59,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignInClick }) => {
                 onClick={onSignInClick}
                 className="go border-0 cursor-pointer text-white font-medium shadow-sm hover:scale-[1.02] transition-transform"
               >
-                Sign in with your institution →
+                {isAuthenticated
+                  ? `Enter Workspace (${userRole}) →`
+                  : 'Sign in with your institution →'}
               </button>
               <a className="plain cursor-pointer" href="#journey">
                 See how a semester flows
