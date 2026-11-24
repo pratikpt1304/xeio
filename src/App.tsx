@@ -55,10 +55,13 @@ const AppContent: React.FC = () => {
         setIsInitializing(false);
       });
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user) {
           setIsAuthenticated(true);
           localStorage.setItem('xeio_authenticated', 'true');
+        } else if (event === 'SIGNED_OUT') {
+          setIsAuthenticated(false);
+          setViewMode('landing');
         }
       });
 
@@ -80,14 +83,20 @@ const AppContent: React.FC = () => {
     setViewMode('app');
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     localStorage.removeItem('xeio_authenticated');
     localStorage.removeItem('xeio_active_role');
-    if (supabase) {
-      await supabase.auth.signOut();
-    }
     setIsAuthenticated(false);
     setViewMode('landing');
+    if (window.location.hash) {
+      window.location.hash = '';
+    }
+    if (window.location.pathname !== '/') {
+      window.history.pushState(null, '', '/');
+    }
+    if (supabase) {
+      supabase.auth.signOut().catch(() => {});
+    }
   };
 
   if (isInitializing) {
