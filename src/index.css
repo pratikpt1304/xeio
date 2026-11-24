@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: #F4F3EF;
+    color: #141413;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .font-serif {
+    font-family: 'IBM Plex Serif', serif;
+  }
+
+  /* PRD Rule: 1px borders, no shadows or gradients */
+  *, ::before, ::after {
+    border-color: #E2E0D8;
+  }
+}
+
+/* Custom scrollbars for IDE & tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E2E0D8;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6B6A63;
+}

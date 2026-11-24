@@ -1,0 +1,152 @@
+import {
+  Institution,
+  CourseDetails,
+  CourseOutcome,
+  COPOMap,
+  MarkingRubric,
+  Session,
+  Batch,
+  StudentProgress,
+  EndSemAssessment,
+  ClassroomItem,
+  CourseFileSection,
+  User,
+} from '../types';
+
+export const cleanInstitution: Institution = {
+  id: 'inst-1',
+  name: 'Institutional Portal',
+  email_domain: 'sanjivani.edu.in',
+  plan: 'Pro',
+  plan_start: '2027-01-01',
+  plan_end: '2027-12-31',
+  ai_total_cap: 125,
+  ai_daily_cap: 5,
+  ai_used_total: 0,
+  ai_used_today: 0,
+};
+
+export const defaultUsers: User[] = [
+  {
+    id: 'user-faculty',
+    email: 'faculty@sanjivani.edu.in',
+    name: 'Faculty Coordinator',
+    roles: ['faculty'],
+    activeRole: 'faculty',
+    scope_id: 'dept-cse',
+    status: 'active',
+  },
+  {
+    id: 'user-student',
+    email: 'student@sanjivani.edu.in',
+    name: 'Student Portal',
+    roll_number: '2301001',
+    roles: ['student'],
+    activeRole: 'student',
+    scope_id: 'course-1',
+    batch_id: 'batch-1',
+    status: 'active',
+  },
+  {
+    id: 'user-hod',
+    email: 'hod@sanjivani.edu.in',
+    name: 'Head of Department',
+    roles: ['hod', 'faculty'],
+    activeRole: 'hod',
+    scope_id: 'dept-cse',
+    status: 'active',
+  },
+  {
+    id: 'user-dean',
+    email: 'dean@sanjivani.edu.in',
+    name: 'Dean of School',
+    roles: ['dean'],
+    activeRole: 'dean',
+    scope_id: 'school-1',
+    status: 'active',
+  },
+  {
+    id: 'user-coe',
+    email: 'coe@sanjivani.edu.in',
+    name: 'Controller of Examinations',
+    roles: ['coe'],
+    activeRole: 'coe',
+    scope_id: 'univ-1',
+    status: 'active',
+  },
+  {
+    id: 'user-vc',
+    email: 'vc@sanjivani.edu.in',
+    name: 'Vice Chancellor',
+    roles: ['vc'],
+    activeRole: 'vc',
+    scope_id: 'univ-1',
+    status: 'active',
+  },
+  {
+    id: 'user-superadmin',
+    email: 'admin@elzeo.in',
+    name: 'System Super Admin',
+    roles: ['super_admin'],
+    activeRole: 'super_admin',
+    scope_id: 'all',
+    status: 'active',
+  },
+];
+
+export const cleanCourseDetails: CourseDetails = {
+  code: '',
+  title: '',
+  ltpc: '0-0-2-1',
+  semester: '',
+  department: '',
+  className: '',
+  facultyInCharge: '',
+  hodEmail: '',
+};
+
+export const defaultRubric: MarkingRubric = {
+  attendance: 10,
+  pre_test: 5,
+  post_test: 5,
+  visible_tests: 10,
+  hidden_tests: 10,
+  viva: 10,
+};
+
+export const cleanEndSemAssessment: EndSemAssessment = {
+  id: 'endsem-clean',
+  batch_id: '',
+  stage: 1, // Stage 1: Rules
+  rules: {
+    questions_per_student: 2,
+    difficulty_mix: { easy: 12, medium: 16, hard: 12 },
+    visible_test_cases: 2,
+    hidden_test_cases: 3,
+    marks_per_visible: 5,
+    marks_per_hidden: 5,
+    viva_marks: 10,
+    duration_min: 120,
+  },
+  questions_pool: [],
+  approved_30_count: 0,
+  hod_status: 'pending',
+  is_active: false,
+};
+
+export const defaultCourseFileSections: CourseFileSection[] = [
+  { num: 1, title: 'Course details', source: 'Course setup', status: 'To date (S1–S14)' },
+  { num: 2, title: 'CO–PO/PSO mapping', source: 'Course setup', status: 'To date (S1–S14)' },
+  { num: 3, title: 'Session plan', source: 'Session plan', status: 'To date (S1–S14)' },
+  { num: 4, title: 'Actual log of session plan (planned vs conducted, gaps)', source: 'Sessions', status: 'To date (S1–S14)' },
+  { num: 5, title: 'Marking rubric (HOD-approved)', source: 'Course setup', status: 'To date (S1–S14)' },
+  { num: 6, title: 'Lab questions with test cases', source: 'Lab questions', status: 'To date (S1–S14)' },
+  { num: 7, title: 'Mark list as per rubric (student index sheets)', source: 'Sessions', status: 'To date (S1–S14)' },
+  { num: 8, title: 'Internal attainment report (CO-wise, overall, bell curves)', source: 'Computed', status: 'To date (S1–S14)' },
+  { num: 9, title: 'Internal summary narrative', source: 'Assist narrative over data', status: 'To date (S1–S14)' },
+  { num: 10, title: 'Suggestions for next BoS', source: 'Faculty + Assist', status: 'To date (S1–S14)' },
+  { num: 11, title: 'End-sem questions', source: 'Assessments (stage 6)', status: 'After end-sem' },
+  { num: 12, title: 'End-sem mark sheet', source: 'Assessments (stage 6)', status: 'After end-sem' },
+  { num: 13, title: 'Overall attainment (internal + end-sem)', source: 'Computed (internal + end-sem)', status: 'After end-sem' },
+  { num: 14, title: 'Overall summary and suggestions', source: 'Assist narrative over data', status: 'After end-sem' },
+];
