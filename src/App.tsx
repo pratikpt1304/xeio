@@ -8,7 +8,6 @@ import { HODConsole } from './components/Oversight/HODConsole';
 import { OversightConsole } from './components/Oversight/OversightConsole';
 import { SuperAdminConsole } from './components/Admin/SuperAdminConsole';
 import { supabase } from './lib/supabase';
-import { Globe } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { currentUser, switchRole } = useApp();
@@ -169,17 +168,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans relative">
-      {/* Floating shortcut to return to landing page */}
-      <button
-        onClick={() => updateViewMode('landing')}
-        title="View XeIO Public Landing Page"
-        className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 px-3 py-1.5 bg-[#141413] text-white hover:bg-[#262624] text-[11px] font-mono rounded-full border border-[#2E2E2C] shadow-lg transition-transform hover:scale-105"
-      >
-        <Globe size={13} className="text-teal" />
-        <span>Public Landing Page</span>
-      </button>
-
+    <div className="min-h-screen flex flex-col font-sans">
       <div className="flex-1">
         {renderCurrentRoleView()}
       </div>
