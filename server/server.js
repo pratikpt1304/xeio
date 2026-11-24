@@ -207,6 +207,46 @@ app.post('/api/submit', async (req, res) => {
   }
 });
 
+// Helper function to call Gemini with automatic retry on 503 / 429
+async function callGemini(prompt, apiKey) {
+  const models = ['gemini-2.5-flash', 'gemini-2.5-pro'];
+
+  for (const model of models) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: 'application/json' },
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          return JSON.parse(rawText);
+        }
+
+        if (res.status === 503 || res.status === 429) {
+          // Wait 1.5s before retry
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+
+        throw new Error(`Gemini responded with HTTP ${res.status}`);
+      } catch (e) {
+        if (attempt === 2 && model === models[models.length - 1]) throw e;
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    }
+  }
+
+  throw new Error('Gemini API temporarily unavailable');
+}
+
 // --------------------------------------------------------------------------
 // 4. Assist LLM - Generate 4 Candidate Questions (/api/assist/generate-questions)
 // --------------------------------------------------------------------------
@@ -231,7 +271,7 @@ Return STRICT JSON matching this schema:
   "questions": [
     {
       "title": "string",
-      "difficulty": "Easy" | "Medium" | "Hard",
+      "difficulty": "Easy",
       "statement": "string",
       "input_format": "string",
       "output_format": "string",
@@ -250,24 +290,7 @@ Return STRICT JSON matching this schema:
   ]
 }`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json' },
-      }),
-    });
-
-    if (!geminiRes.ok) {
-      throw new Error(`Gemini API failed with status ${geminiRes.status}`);
-    }
-
-    const data = await geminiRes.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const parsed = JSON.parse(rawText);
-
+    const parsed = await callGemini(prompt, apiKey);
     return res.json(parsed);
   } catch (err) {
     console.error('Error in /api/assist/generate-questions:', err);
@@ -293,19 +316,8 @@ app.post('/api/assist/generate-banks', async (req, res) => {
 Constraint: STRICTLY 0 OVERLAP between pre-test and post-test.
 Return JSON with "pre_test" (array of 5 MCQs) and "post_test" (array of 5 MCQs), each with stem, 4 options, and correct index (0-3).`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json' },
-      }),
-    });
-
-    const data = await geminiRes.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    return res.json(JSON.parse(rawText));
+    const parsed = await callGemini(prompt, apiKey);
+    return res.json(parsed);
   } catch (err) {
     console.error('Error in /api/assist/generate-banks:', err);
     return res.status(500).json({ error: err.message });
