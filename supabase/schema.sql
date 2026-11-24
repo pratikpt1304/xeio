@@ -266,3 +266,52 @@ CREATE POLICY "Faculty can inspect course submissions" ON submissions
             AND courses.faculty_id = auth.uid()
         )
     );
+
+-- ==============================================================================
+-- 19. SUPABASE STORAGE BUCKETS & POLICIES (PRD Section 11 & Deployment Plan)
+-- ==============================================================================
+-- 1. proctor-snapshots (stores live AI proctoring face & screen snapshots)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'proctor-snapshots',
+    'proctor-snapshots',
+    true,
+    5242880, -- 5 MB limit
+    ARRAY['image/png', 'image/jpeg', 'image/webp']
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 5242880,
+    allowed_mime_types = ARRAY['image/png', 'image/jpeg', 'image/webp'];
+
+-- 2. course-files (stores generated 14-section NBA Course Files & Student Records)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'course-files',
+    'course-files',
+    true,
+    20971520, -- 20 MB limit
+    ARRAY['application/pdf', 'application/json', 'text/plain']
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 20971520,
+    allowed_mime_types = ARRAY['application/pdf', 'application/json', 'text/plain'];
+
+-- Storage Access Policies
+CREATE POLICY "Public Read Proctor Snapshots"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'proctor-snapshots');
+
+CREATE POLICY "Allow Upload Proctor Snapshots"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'proctor-snapshots');
+
+CREATE POLICY "Public Read Course Files"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'course-files');
+
+CREATE POLICY "Allow Upload Course Files"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'course-files');
+

@@ -14,7 +14,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Supabase Client Setup
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://hhqufgoaypijuehbvzwx.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable__ibVC0PzzvGeniOv13yUiA_LVxAbE1e';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable__ibVC0PzzvGeniOv13yUiA_LVxAbE1e';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Judge0 Configuration
@@ -320,6 +320,46 @@ Return JSON with "pre_test" (array of 5 MCQs) and "post_test" (array of 5 MCQs),
     return res.json(parsed);
   } catch (err) {
     console.error('Error in /api/assist/generate-banks:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------------------------------------------------------------------
+// 6. Storage Buckets Initialization & Inspection (/api/storage/init)
+// --------------------------------------------------------------------------
+app.post('/api/storage/init', async (req, res) => {
+  try {
+    const buckets = [
+      { name: 'proctor-snapshots', public: true },
+      { name: 'course-files', public: true },
+    ];
+    const results = [];
+
+    for (const b of buckets) {
+      const { data, error } = await supabase.storage.createBucket(b.name, {
+        public: b.public,
+      });
+      if (error && !error.message?.includes('already exists')) {
+        results.push({ bucket: b.name, status: 'error', message: error.message });
+      } else {
+        results.push({ bucket: b.name, status: 'ready' });
+      }
+    }
+
+    return res.json({ success: true, buckets: results });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/storage/status', async (req, res) => {
+  try {
+    const { data: buckets, error } = await supabase.storage.listBuckets();
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.json({ buckets });
+  } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 });
